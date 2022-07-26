@@ -1,12 +1,18 @@
-
-
-type Event = {
+export type GeekSeekEvent = {
   name: "GS";
   type: "geek-seek";
   amounts: number;
-} | {
+}
+
+export type CommuteEvent = {
+  name: "出勤";
+  type: "commute";
+  fare: number;
+}
+
+export type Event = GeekSeekEvent | CommuteEvent | {
   name: string;
-  type: "remote" | "commute" | "walking" | "drinking" | "energy";
+  type: "remote" | "walking" | "drinking" | "energy";
   amounts: undefined;
 };
 

@@ -25,8 +25,18 @@ a:hover {
   color: #535bf2;
 }
 
-div.text {
+div.meta {
+  text-align: right;;
   line-height: 1.2em;
+  padding: 0px 0 20px 0;
+}
+
+div.text {
+  line-height: 1.5em;
+}
+
+div.details {
+  font-size: 0.8rem;
 }
 
 body {
@@ -40,6 +50,7 @@ body {
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+  margin: 10px 0;
 }
 
 h2 {
@@ -82,7 +93,7 @@ button:focus-visible {
 
 .day {
   text-align: right;
-  padding: 39px 10px 5px;
+  padding: 45px 10px 3px;
   letter-spacing: 1px;
   font-size: 12px;
   box-sizing: border-box;

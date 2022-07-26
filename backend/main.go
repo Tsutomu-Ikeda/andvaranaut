@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -10,7 +11,8 @@ import (
 type Event struct {
 	Name      string `json:"name"`
 	EventType string `json:"type"`
-	Amounts   *int64 `json:"amounts"`
+	Fare      int    `json:"fare,omitempty"`
+	Amounts   int    `json:"amounts,omitempty"`
 }
 
 type DateEvent struct {
@@ -19,7 +21,7 @@ type DateEvent struct {
 }
 
 type TransitInformation struct {
-	UnitPrice    int64     `json:"unitPrice"`
+	UnitPrice    int       `json:"unitPrice"`
 	LastModified time.Time `json:"lastModified"`
 }
 
@@ -64,5 +66,6 @@ func transitInformationHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/api/dateEvents/", dateEventsHandler)
 	http.HandleFunc("/api/transitInformation/", transitInformationHandler)
-	http.ListenAndServe(":8000", nil)
+	fmt.Println("listening: http://localhost:8000")
+	http.ListenAndServe("127.0.0.1:8000", nil)
 }

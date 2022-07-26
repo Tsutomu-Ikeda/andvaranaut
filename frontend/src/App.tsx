@@ -1,46 +1,58 @@
-import { FunctionComponent, useMemo, useState } from "react";
+import { FC, useMemo } from "react";
 import { useAsync } from "react-use";
 import "./App.css";
-import { PersistenceClient, DateEvent } from "./lib/persistence";
+import { Calendar } from "./component/calendar";
+import { PersistenceClient, CommuteEvent } from "./lib/persistence";
 
 const dup = <T,>(obj: T): T => {
   return JSON.parse(JSON.stringify(obj));
 };
 
-const App: FunctionComponent = () => {
+type CommuteStats = {
+  costs: { [key: string]: number };
+  counts: { [key: string]: number };
+  walkCounts: { [key: string]: number };
+};
+
+const App: FC = () => {
   const currentMonth = "2022-07";
-  const client = new PersistenceClient();
-  const { value: transitInformation } = useAsync(client.transitInformation);
-  const getText = (dateEvent: DateEvent) => {
-    if (dateEvent.date?.getDate?.() == 1) {
-      return `${dateEvent.date.getMonth() + 1}/${dateEvent.date.getDate()}`;
-    }
+  const client = useMemo(() => new PersistenceClient(), []);
+  const { value: transitInformation } = useAsync(client.transitInformation, [
+    currentMonth,
+  ]);
+  const { value: days } = useAsync(client.calendarEvents, [currentMonth]);
+  const {
+    costs: totalCommuteCosts,
+    counts: commuteCounts,
+    walkCounts,
+  }: CommuteStats = useMemo<CommuteStats | undefined>(() => {
+    if (!transitInformation) return { costs: {}, counts: {}, walkCounts: {} };
+    const data = days?.reduce<CommuteStats>(
+      (prev, current) => {
+        const commuteEvent: CommuteEvent | undefined = current.events.find(
+          (event) => event.type == "commute"
+        ) as any;
+        const walkEventCount: number = current.events.filter(
+          (event) => event.type == "walking"
+        ).length;
+        if (!commuteEvent) return prev;
+        if (!current.date) return prev;
+        const key = current.date.toISOString().slice(0, 7);
 
-    return dateEvent.date?.getDate?.();
-  };
-  const { value: days } = useAsync(client.calendarEvents, []);
-  const commuteCounts = useMemo(() => {
-    return days?.reduce((prev: { [key: string]: number }, current) => {
-      if (!current.events.some((event) => event.type == "commute")) return prev;
-      if (!current.date) return prev;
-      const key = current.date.toISOString().slice(0, 7);
-      if (!prev[key]) prev[key] = 1;
-      else prev[key] += 1;
+        prev.counts[key] = (prev.counts[key] ?? 0) + 1;
+        prev.walkCounts[key] = (prev.walkCounts[key] ?? 0) + walkEventCount;
 
-      return prev;
-    }, {});
-  }, [days]);
-  const walkCounts = useMemo(() => {
-    return days?.reduce((prev: { [key: string]: number }, current) => {
-      if (!current.events.some((event) => event.type == "walking")) return prev;
-      if (!current.date) return prev;
-      const key = current.date.toISOString().slice(0, 7);
-      if (!prev[key]) prev[key] = 1;
-      else prev[key] += 1;
+        prev.costs[key] =
+          (prev.costs[key] ?? 0) +
+          (commuteEvent.fare ??
+            transitInformation.unitPrice * (2 - walkEventCount));
 
-      return prev;
-    }, {});
-  }, [days]);
+        return prev;
+      },
+      { costs: {}, counts: {}, walkCounts: {} }
+    );
+    return data;
+  }, [days, transitInformation]) ?? { costs: {}, counts: {}, walkCounts: {} };
   const geekSeekCounts = useMemo(() => {
     return days?.reduce(
       (
@@ -74,35 +86,14 @@ const App: FunctionComponent = () => {
   return (
     <div className="App">
       <h1>Andvaranaut</h1>
-      <div className="calendar">
-        <div className="day-name">月</div>
-        <div className="day-name">火</div>
-        <div className="day-name">水</div>
-        <div className="day-name">木</div>
-        <div className="day-name">金</div>
-        <div className="day-name blue">土</div>
-        <div className="day-name red">日</div>
-        {days &&
-          days.map((day, index) => (
-            <div
-              className={`day ${
-                day.date && day.date < new Date(currentMonth) && "disabled"
-              }`}
-              key={index}
-            >
-              {getText(day)}
-              <div className="events">
-                {day.events
-                  // .filter((event) => event.type == "drinking")
-                  .map((event, index) => (
-                    <div className={`event-chip ${event.type}`} key={index}>
-                      {event.name}
-                    </div>
-                  ))}
-              </div>
-            </div>
-          ))}
+      <div className="meta">
+        最終更新日:{" "}
+        {transitInformation && transitInformation.lastModified.toISOString()}
       </div>
+      <div className="meta">
+        <a href="http://localhost:3333/daily-report-editor/">日報入力</a>
+      </div>
+      {days && <Calendar days={days} currentMonth={currentMonth}></Calendar>}
       <div className="card">
         <h2>交通費管理</h2>
         <div className="text">
@@ -114,29 +105,34 @@ const App: FunctionComponent = () => {
         <div className="text">
           合計金額:{" "}
           {walkCounts &&
-            commuteCounts &&
-            transitInformation.unitPrice *
-              (Object.entries(commuteCounts).filter(([key, _value]) => (new Date(key) >= new Date(currentMonth))).reduce(
-                (prev, [_key, count]) => prev + count,
-                0
-              ) *
-                2 -
-                Object.entries(walkCounts).filter(([key, _value]) => (new Date(key) >= new Date(currentMonth))).reduce(
-                  (prev, [_key, count]) => prev + count,
-                  0
-                ))}
-        </div>
-        <div className="text">
-          最終更新日: {transitInformation && transitInformation.lastModified.toISOString().slice(0, 10)}
+            totalCommuteCosts &&
+            `${Object.entries(totalCommuteCosts)
+              .filter(
+                ([key, _value]) => new Date(key) >= new Date(currentMonth)
+              )
+              .reduce((prev, [_key, cost]) => {
+                return prev + cost;
+              }, 0)
+              .toLocaleString()}円`}
         </div>
         <h2>GEEK SEEK</h2>
-        {geekSeekCounts &&
-          Object.entries(geekSeekCounts).map((geekSeekCount, index) => (
-            <div key={index}>
-              {geekSeekCount[0]}: {geekSeekCount[1].times}回, 合計金額:{" "}
-              {geekSeekCount[1].amounts}
+        {geekSeekCounts && (
+          <div className="text">
+            合計金額:{" "}
+            {Object.values(geekSeekCounts)
+              .reduce((prev, geekSeekCount) => prev + geekSeekCount.amounts, 0)
+              .toLocaleString()}
+            円
+            <div className="details">
+              {Object.entries(geekSeekCounts).map((geekSeekCount, index) => (
+                <div key={index}>
+                  {geekSeekCount[0]}: {geekSeekCount[1].times}回, 小計:{" "}
+                  {geekSeekCount[1].amounts.toLocaleString()}円
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+        )}
         <h2>持株会</h2>
       </div>
     </div>
