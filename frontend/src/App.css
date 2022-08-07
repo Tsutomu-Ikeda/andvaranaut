@@ -6,10 +6,26 @@
   text-align: center;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Helvetica Neue",
+    Arial,
+    "Hiragino Kaku Gothic ProN",
+    "Hiragino Sans",
+    Meiryo,
+    sans-serif;
+  margin: 0.5rem 0;
+}
+
 .card {
   padding: 2em;
 }
 
 .read-the-docs {
   color: #888;
+}
+
+.ReactModal__Body--open {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
 }

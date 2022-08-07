@@ -19,6 +19,7 @@ export type Event = GeekSeekEvent | CommuteEvent | {
 export interface DateEvent {
   date?: Date;
   events: Event[];
+  workingDay: boolean;
 }
 
 export interface TransitInformation {

@@ -84,7 +84,7 @@ const App: FC = () => {
   }, [days]);
 
   return (
-    <div className="App">
+    <div className="App" id="App">
       <h1>Andvaranaut</h1>
       <div className="meta">
         最終更新日:{" "}
