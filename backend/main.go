@@ -18,6 +18,7 @@ type Event struct {
 type DateEvent struct {
 	Date  time.Time `json:"date"`
 	Event []Event   `json:"events"`
+	WorkingDay bool `json:"workingDay"`
 }
 
 type TransitInformation struct {
