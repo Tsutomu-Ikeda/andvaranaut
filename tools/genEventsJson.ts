@@ -1,3 +1,7 @@
+import * as fs from 'fs';
+
+const initialData = JSON.parse(fs.readFileSync(0, 'utf-8'));
+
 const numDatesFromBeginningOfYear = (date: Date): number => {
   const current = new Date(date);
   current.setHours(0, 0, 0, 0);
@@ -24,16 +28,18 @@ const getEvents = (date: Date) => {
 
   return events;
 };
-let dateCounter = new Date(`2022-08-01T00:00:00Z`);
+let dateCounter = new Date(`2022-06-27T00:00:00Z`);
 
-const days = new Array(31).fill(undefined).map(() => {
+const days = Object.entries(new Array(4 + 31 + 7).fill(undefined).reduce((prev) => {
   const date = new Date(dateCounter);
   dateCounter.setDate(dateCounter.getDate() + 1)
-  return {
+  prev[date.toISOString()] = {
     date,
-    // events: getEvents(date),
-    events: [],
+    events: getEvents(date),
+    ...prev[date.toISOString()],
+    workingDay: [1, 2, 3, 4, 5].includes(date.getDay())
   }
-});
+  return prev
+}, Object.fromEntries(initialData.map((day) => [day.date, day])))).map((row) => row[1]);
 
 console.log(JSON.stringify(days))
