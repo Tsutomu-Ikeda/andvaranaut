@@ -1,7 +1,8 @@
-import { FC, useMemo } from "react";
+import { FC, useEffect, useMemo } from "react";
 import { useAsync } from "react-use";
 import "./App.css";
 import { Calendar } from "./component/calendar";
+import { useLogin } from "./hooks/use-login";
 import { PersistenceClient, CommuteEvent } from "./lib/persistence";
 
 const dup = <T,>(obj: T): T => {
@@ -16,11 +17,15 @@ type CommuteStats = {
 
 const App: FC = () => {
   const currentMonth = "2022-07";
-  const client = useMemo(() => new PersistenceClient(), []);
-  const { value: transitInformation } = useAsync(client.transitInformation, [
-    currentMonth,
-  ]);
-  const { value: days } = useAsync(client.calendarEvents, [currentMonth]);
+  const { token } = useLogin();
+  const { value: transitInformation } = useAsync(
+    async () => await new PersistenceClient().transitInformation(token),
+    [token]
+  );
+  const { value: days } = useAsync(
+    async () => await new PersistenceClient().calendarEvents(token),
+    [token]
+  );
   const {
     costs: totalCommuteCosts,
     counts: commuteCounts,

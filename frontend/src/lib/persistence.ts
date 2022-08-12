@@ -39,20 +39,21 @@ const parseWithDate = (str: string) => {
 };
 
 export class PersistenceClient {
-  constructor() {
-  }
+  async calendarEvents(token: string): Promise<DateEvent[]> {
+    if (!token) return []
 
-  async calendarEvents(): Promise<DateEvent[]> {
-    const days: DateEvent[] = parseWithDate(await fetch("http://localhost:8000/api/dateEvents/").then((resp) => resp.text()));
+    const days: DateEvent[] = parseWithDate(await fetch("/api/date_events", { headers: { Authorization: `Bearer ${token}` } }).then((resp) => resp.text()));
     const remainDays: DateEvent[] = new Array((7 - days.length % 7) % 7)
       .fill(undefined)
-      .map((_, i) => ({ date: undefined, events: [] }));
+      .map((_, i) => ({ date: undefined, events: [], workingDay: false }));
 
     return [...days, ...remainDays]
   }
 
-  async transitInformation(): Promise<TransitInformation> {
-    const data: TransitInformation = parseWithDate(await fetch("http://localhost:8000/api/transitInformation/").then((resp) => resp.text()));
+  async transitInformation(token: string): Promise<TransitInformation> {
+    if (!token) return { unitPrice: 1, lastModified: new Date() }
+
+    const data: TransitInformation = parseWithDate(await fetch("/api/transit_information", { headers: { Authorization: `Bearer ${token}` } }).then((resp) => resp.text()));
     return data;
   }
 }

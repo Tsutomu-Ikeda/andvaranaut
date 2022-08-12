@@ -16,9 +16,9 @@ type Event struct {
 }
 
 type DateEvent struct {
-	Date  time.Time `json:"date"`
-	Event []Event   `json:"events"`
-	WorkingDay bool `json:"workingDay"`
+	Date       time.Time `json:"date"`
+	Event      []Event   `json:"events"`
+	WorkingDay bool      `json:"workingDay"`
 }
 
 type TransitInformation struct {
@@ -65,8 +65,8 @@ func transitInformationHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/api/dateEvents/", dateEventsHandler)
-	http.HandleFunc("/api/transitInformation/", transitInformationHandler)
+	http.HandleFunc("/api/date_events", dateEventsHandler)
+	http.HandleFunc("/api/transit_information", transitInformationHandler)
 	fmt.Println("listening: http://localhost:8000")
 	http.ListenAndServe("127.0.0.1:8000", nil)
 }
