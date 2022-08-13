@@ -55,6 +55,14 @@ resource "aws_apigatewayv2_integration" "get_date_events" {
   integration_method = "POST"
 }
 
+resource "aws_apigatewayv2_integration" "post_date_events" {
+  api_id = aws_apigatewayv2_api.andvaranaut.id
+
+  integration_uri    = aws_lambda_function.post_date_events.invoke_arn
+  integration_type   = "AWS_PROXY"
+  integration_method = "POST"
+}
+
 resource "aws_apigatewayv2_integration" "get_transit_information" {
   api_id = aws_apigatewayv2_api.andvaranaut.id
 
@@ -68,6 +76,15 @@ resource "aws_apigatewayv2_route" "get_date_events" {
 
   route_key          = "GET /api/date_events"
   target             = "integrations/${aws_apigatewayv2_integration.get_date_events.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.andvaranaut_auth.id
+}
+
+resource "aws_apigatewayv2_route" "post_date_events" {
+  api_id = aws_apigatewayv2_api.andvaranaut.id
+
+  route_key          = "POST /api/date_events"
+  target             = "integrations/${aws_apigatewayv2_integration.post_date_events.id}"
   authorization_type = "JWT"
   authorizer_id      = aws_apigatewayv2_authorizer.andvaranaut_auth.id
 }
