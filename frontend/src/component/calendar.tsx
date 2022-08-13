@@ -11,14 +11,12 @@ const modalContentStyle: (props: StyleProps) => CSSProperties = ({ dark }) => ({
   backgroundColor: dark ? "#242424" : "#fff",
   width: "80vw",
   maxWidth: "840px",
-  padding: "1em",
   userSelect: "none",
   overflow: "scroll",
   margin: "auto",
   border: "none",
-  flexDirection: "column",
   height: "min-content",
-  minHeight: "60vh",
+  minHeight: "70vh",
   maxHeight: "90vh",
   borderRadius: "5px",
 });
@@ -66,11 +64,7 @@ const theme = {
   },
   modalInnerContainer: {
     width: "100%",
-    padding: "20px 0",
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, 80%)",
-    justifyContent: "center",
-    alignContent: "center",
+    padding: "20px",
   },
   blue: (props: StyleProps) => ({
     color: props.dark ? "rgb(126, 145, 242)" : "rgb(38, 101, 236)",

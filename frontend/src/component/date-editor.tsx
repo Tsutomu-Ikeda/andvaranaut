@@ -10,10 +10,11 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
-  Button,
 } from "@mui/material";
 import { daysOfWeeks } from "../lib/calendar";
 import { Classes } from "jss";
+import IconButton from "@mui/material/IconButton";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
 const allEvents: Event[] = [
   {
@@ -130,7 +131,7 @@ export const DateEditor: FC<DateEditorProps> = ({
   }, [currentDateEventIndex, dateEvents]);
 
   return (
-    <>
+    <div style={{ position: "relative", width: "100%" }}>
       <h2>
         {dateEvents[currentDateEventIndex].date
           .toISOString()
@@ -300,10 +301,10 @@ export const DateEditor: FC<DateEditorProps> = ({
           }
           label="エナドリを飲んだ"
         />
-        <Button
+      </FormGroup>
+      <div style={{ position: "absolute", top: "-5px", right: "-5px" }}>
+        <IconButton
           sx={{ my: 1 }}
-          color="error"
-          variant="contained"
           onClick={(e) => {
             setDateEvents((current) => {
               if (current === undefined) return current;
@@ -311,9 +312,9 @@ export const DateEditor: FC<DateEditorProps> = ({
             });
           }}
         >
-          クリア
-        </Button>
-      </FormGroup>
-    </>
+          <DeleteForeverIcon color="error" titleAccess="クリア" />
+        </IconButton>
+      </div>
+    </div>
   );
 };
