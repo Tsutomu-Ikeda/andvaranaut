@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -27,8 +28,10 @@ func handle(ctx context.Context, request events.APIGatewayProxyRequest) (events.
 
 	svc := s3.New(awsSession)
 
+	bucket_name := os.Getenv("AWS_S3_BUCKET_NAME")
+
 	obj, err := svc.GetObject(&s3.GetObjectInput{
-		Bucket: aws.String(os.Getenv("AWS_S3_BUCKET_NAME")),
+		Bucket: aws.String(bucket_name),
 		Key:    aws.String(fmt.Sprintf("transit-informations/%s.json", username)),
 	})
 	if err != nil {
@@ -41,11 +44,29 @@ func handle(ctx context.Context, request events.APIGatewayProxyRequest) (events.
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(rc)
 
+	var defaultValueJson ResponseBody
+	if err := json.Unmarshal(buf.Bytes(), &defaultValueJson); err != nil {
+		panic(err)
+	}
+
+	dateEventsObj, err := svc.HeadObject(&s3.HeadObjectInput{
+		Bucket: aws.String(bucket_name),
+		Key:    aws.String(fmt.Sprintf("date-events/%s.json", username)),
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	p := ResponseBody{LastModified: *dateEventsObj.LastModified, UnitPrice: defaultValueJson.UnitPrice}
+	s, err := json.Marshal(p)
+	if err != nil {
+		panic(err)
+	}
+
 	return events.APIGatewayProxyResponse{
 		Headers: map[string]string{
 			"Content-Type": "application/json",
 		},
-		Body:       string(buf.String()),
+		Body:       string(s),
 		StatusCode: 200,
 	}, nil
 }
