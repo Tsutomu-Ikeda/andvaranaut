@@ -12,7 +12,9 @@ build:
 	make build_backend && make build_frontend
 
 deploy_frontend:
-	export AWS_PROFILE=${AWS_PROFILE} && aws s3 sync frontend/dist s3://andvaranaut-frontend/
+	export AWS_PROFILE=${AWS_PROFILE} && aws s3 sync --delete --size-only frontend/dist s3://andvaranaut-frontend/
+	export AWS_PROFILE=$(AWS_PROFILE) && ./tools/upload_if_modified.sh index.html
+	export AWS_PROFILE=$(AWS_PROFILE) && ./tools/upload_if_modified.sh robots.txt
 
 deploy_backend:
 	export AWS_PROFILE=${AWS_PROFILE} && \
