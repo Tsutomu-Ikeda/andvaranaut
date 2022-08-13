@@ -9,12 +9,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.10.0",
+    "@emotion/styled": "^11.10.0",
+    "@fontsource/roboto": "^4.5.8",
+    "@mui/material": "^5.10.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-jss": "^10.9.1",
     "react-modal": "^3.15.1"
   },
   "devDependencies": {
+    "@types/material-ui": "^0.21.12",
     "@types/react": "^18.0.15",
     "@types/react-dom": "^18.0.6",
     "@types/react-modal": "^3.13.1",
