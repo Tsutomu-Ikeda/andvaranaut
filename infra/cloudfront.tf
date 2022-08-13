@@ -33,8 +33,8 @@ resource "aws_cloudfront_distribution" "andvaranaut" {
   aliases = ["andv.tomtsutom.com"]
 
   custom_error_response {
-    error_code = 404
-    response_code = 200
+    error_code         = 404
+    response_code      = 200
     response_page_path = "/index.html"
   }
 
