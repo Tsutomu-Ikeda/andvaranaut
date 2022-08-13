@@ -1,9 +1,13 @@
 import { FC, useEffect, useMemo, useState } from "react";
-import { useAsync } from "react-use";
 import "./App.css";
 import { Calendar } from "./component/calendar";
 import { useLogin } from "./hooks/use-login";
-import { PersistenceClient, CommuteEvent, DateEvent } from "./lib/persistence";
+import {
+  PersistenceClient,
+  CommuteEvent,
+  DateEvent,
+  TransitInformation,
+} from "./lib/persistence";
 
 type CommuteStats = {
   costs: { [key: string]: number };
@@ -14,18 +18,19 @@ type CommuteStats = {
 const App: FC = () => {
   const currentMonth = "2022-07";
   const { token } = useLogin();
-  const { value: transitInformation } = useAsync(
-    async () => await new PersistenceClient().transitInformation(token),
-    [token]
-  );
   const [dateEvents, setDateEvents] = useState<DateEvent[]>();
   const [authError, setAuthError] = useState<string>();
   const [isSaving, setIsSaving] = useState(false);
+  const [transitInformation, setTransitInformation] =
+    useState<TransitInformation>();
 
   useEffect(() => {
     (async () => {
       try {
         setDateEvents(await new PersistenceClient().calendarEvents(token));
+        setTransitInformation(
+          await new PersistenceClient().transitInformation(token)
+        );
       } catch {
         setAuthError("認証に失敗しました");
       }
@@ -134,7 +139,10 @@ const App: FC = () => {
           onClick={async () => {
             setIsSaving(true);
             try {
-              await new PersistenceClient().saveCalendarEvents(token, dateEvents);
+              await new PersistenceClient().saveCalendarEvents(
+                token,
+                dateEvents
+              );
             } finally {
               setIsSaving(false);
             }
