@@ -1,6 +1,5 @@
 :root {
-  font-family: "Helvetica Neue",
-    Arial,
+  font-family:
     "Hiragino Kaku Gothic ProN",
     "Hiragino Sans",
     Meiryo,
@@ -83,18 +82,6 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
-}
-
-.calendar {
-  display: grid;
-  width: 100%;
-  grid-template-columns: repeat(7, minmax(20px, 1fr));
-  grid-gap: 1px;
-  border: 1px solid rgb(187, 187, 187);
-  background-color: rgb(187, 187, 187);
-  box-sizing: border-box;
-  overflow: auto;
-  position: relative;
 }
 
 .day-name {

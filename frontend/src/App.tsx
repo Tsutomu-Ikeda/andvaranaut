@@ -1,13 +1,9 @@
-import { FC, useEffect, useMemo } from "react";
+import { FC, useMemo } from "react";
 import { useAsync } from "react-use";
 import "./App.css";
 import { Calendar } from "./component/calendar";
 import { useLogin } from "./hooks/use-login";
 import { PersistenceClient, CommuteEvent } from "./lib/persistence";
-
-const dup = <T,>(obj: T): T => {
-  return JSON.parse(JSON.stringify(obj));
-};
 
 type CommuteStats = {
   costs: { [key: string]: number };
@@ -101,12 +97,7 @@ const App: FC = () => {
       {days && <Calendar days={days} currentMonth={currentMonth}></Calendar>}
       <div className="card">
         <h2>交通費管理</h2>
-        <div className="text">
-          出勤回数: {commuteCounts && commuteCounts[currentMonth]}
-        </div>
-        <div className="text">
-          徒歩帰宅回数: {walkCounts && walkCounts[currentMonth]}
-        </div>
+
         <div className="text">
           合計金額:{" "}
           {walkCounts &&
@@ -120,6 +111,31 @@ const App: FC = () => {
               }, 0)
               .toLocaleString()}円`}
         </div>
+        <div className="details">
+          {Object.keys(commuteCounts)
+            .filter((key) => new Date(key) >= new Date(currentMonth))
+            .map((month) => (
+              <div key={month}>
+                <h3>{month}</h3>
+                <div className="text">
+                  出勤回数: {commuteCounts && commuteCounts[month]}
+                </div>
+                <div className="text">
+                  徒歩帰宅回数: {walkCounts && walkCounts[month]}
+                </div>
+                <div className="text">
+                  {walkCounts &&
+                    totalCommuteCosts &&
+                    `${Object.entries(totalCommuteCosts)
+                      .filter(([key, _value]) => key == month)
+                      .reduce((prev, [_key, cost]) => {
+                        return prev + cost;
+                      }, 0)
+                      .toLocaleString()}円`}
+                </div>
+              </div>
+            ))}
+        </div>
         <h2>GEEK SEEK</h2>
         {geekSeekCounts && (
           <div className="text">
@@ -129,12 +145,15 @@ const App: FC = () => {
               .toLocaleString()}
             円
             <div className="details">
-              {Object.entries(geekSeekCounts).map((geekSeekCount, index) => (
-                <div key={index}>
-                  {geekSeekCount[0]}: {geekSeekCount[1].times}回, 小計:{" "}
-                  {geekSeekCount[1].amounts.toLocaleString()}円
-                </div>
-              ))}
+              {Object.entries(geekSeekCounts)
+                .filter(([key]) => new Date(key) >= new Date(currentMonth))
+                .map((geekSeekCount, index) => (
+                  <div key={index}>
+                    <h3>{geekSeekCount[0]}</h3>
+                    {geekSeekCount[1].times}回, 小計:{" "}
+                    {geekSeekCount[1].amounts.toLocaleString()}円
+                  </div>
+                ))}
             </div>
           </div>
         )}
