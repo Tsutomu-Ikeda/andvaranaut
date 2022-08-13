@@ -2,6 +2,30 @@ resource "aws_s3_bucket" "andvaranaut_data" {
   bucket = "andvaranaut-data"
 }
 
+resource "aws_s3_bucket_versioning" "andvaranaut_data" {
+  bucket = aws_s3_bucket.andvaranaut_data.bucket
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "andvaranaut_data_lifecycle" {
+  depends_on = [aws_s3_bucket_versioning.andvaranaut_data]
+
+  bucket = aws_s3_bucket.andvaranaut_data.bucket
+
+  rule {
+    id = "expire_noncurrent_version_object"
+
+    noncurrent_version_expiration {
+      noncurrent_days = 30
+    }
+
+    status = "Enabled"
+  }
+}
+
 resource "aws_s3_bucket_acl" "andvaranaut_data" {
   bucket = aws_s3_bucket.andvaranaut_data.bucket
   acl    = "private"
