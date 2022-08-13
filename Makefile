@@ -1,9 +1,15 @@
 include .env
 
-build:
-	cd backend/get_date_events && GOOS=linux GOARCH=amd64 go build -o bin/
-	cd backend/get_transit_information && GOOS=linux GOARCH=amd64 go build -o bin/
+build_frontend:
 	cd frontend && yarn build
+
+build_backend:
+	cd backend/get_date_events && GOOS=linux GOARCH=amd64 go build -o bin/
+	cd backend/post_date_events && GOOS=linux GOARCH=amd64 go build -o bin/
+	cd backend/get_transit_information && GOOS=linux GOARCH=amd64 go build -o bin/
+
+build:
+	make build_backend && make build_frontend
 
 deploy_frontend:
 	export AWS_PROFILE=${AWS_PROFILE} && aws s3 sync frontend/dist s3://andvaranaut-frontend/
