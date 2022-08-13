@@ -1,11 +1,6 @@
 resource "aws_apigatewayv2_api" "andvaranaut" {
   name          = "andvaranaut"
   protocol_type = "HTTP"
-  cors_configuration {
-    allow_origins = ["*"]
-    allow_methods = ["POST", "GET"]
-    allow_headers = ["content-type", "Authorization"]
-  }
 }
 
 resource "aws_apigatewayv2_authorizer" "andvaranaut_auth" {
