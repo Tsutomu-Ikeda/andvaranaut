@@ -8,3 +8,11 @@ provider "aws" {
 locals {
   lambdas_source_dir = "${path.module}/../backend/"
 }
+
+terraform {
+  backend "s3" {
+    bucket = "tomtsutom-infra"
+    key    = "andvaranaut/terraform.tfstate"
+    region = "ap-northeast-1"
+  }
+}
