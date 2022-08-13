@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -27,7 +27,7 @@ type TransitInformation struct {
 }
 
 func dateEventsHandler(w http.ResponseWriter, r *http.Request) {
-	bytes, err := ioutil.ReadFile("data/2022-07-26.json")
+	bytes, err := os.ReadFile("data/2022-07-26.json")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -46,7 +46,7 @@ func dateEventsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func transitInformationHandler(w http.ResponseWriter, r *http.Request) {
-	bytes, err := ioutil.ReadFile("data/transitInformation.json")
+	bytes, err := os.ReadFile("data/transitInformation.json")
 	if err != nil {
 		panic(err.Error())
 	}
