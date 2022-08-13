@@ -1,9 +1,9 @@
-import { FC, useMemo } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { useAsync } from "react-use";
 import "./App.css";
 import { Calendar } from "./component/calendar";
 import { useLogin } from "./hooks/use-login";
-import { PersistenceClient, CommuteEvent } from "./lib/persistence";
+import { PersistenceClient, CommuteEvent, DateEvent } from "./lib/persistence";
 
 type CommuteStats = {
   costs: { [key: string]: number };
@@ -18,17 +18,27 @@ const App: FC = () => {
     async () => await new PersistenceClient().transitInformation(token),
     [token]
   );
-  const { value: days } = useAsync(
-    async () => await new PersistenceClient().calendarEvents(token),
-    [token]
-  );
+  const [dateEvents, setDateEvents] = useState<DateEvent[]>();
+  const [authError, setAuthError] = useState<string>();
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setDateEvents(await new PersistenceClient().calendarEvents(token));
+      } catch {
+        setAuthError("認証に失敗しました");
+      }
+    })();
+  }, [token]);
+
   const {
     costs: totalCommuteCosts,
     counts: commuteCounts,
     walkCounts,
   }: CommuteStats = useMemo<CommuteStats | undefined>(() => {
     if (!transitInformation) return { costs: {}, counts: {}, walkCounts: {} };
-    const data = days?.reduce<CommuteStats>(
+    const data = dateEvents?.reduce<CommuteStats>(
       (prev, current) => {
         const commuteEvent: CommuteEvent | undefined = current.events.find(
           (event) => event.type == "commute"
@@ -53,9 +63,13 @@ const App: FC = () => {
       { costs: {}, counts: {}, walkCounts: {} }
     );
     return data;
-  }, [days, transitInformation]) ?? { costs: {}, counts: {}, walkCounts: {} };
+  }, [dateEvents, transitInformation]) ?? {
+    costs: {},
+    counts: {},
+    walkCounts: {},
+  };
   const geekSeekCounts = useMemo(() => {
-    return days?.reduce(
+    return dateEvents?.reduce(
       (
         prev: { [key: string]: { times: number; amounts: number } },
         current
@@ -82,19 +96,53 @@ const App: FC = () => {
       },
       {}
     );
-  }, [days]);
+  }, [dateEvents]);
+
+  if (authError) {
+    return (
+      <>
+        {authError}
+        <br /> 再度{" "}
+        <a href="https://andv.auth.ap-northeast-1.amazoncognito.com/login?response_type=token&client_id=2ugimh4tmganbnn94kk1u6r4p3&redirect_uri=https://andv.tomtsutom.com/login">
+          ログインページ
+        </a>{" "}
+        からログインしてください
+      </>
+    );
+  }
 
   return (
     <div className="App" id="App">
       <h1>Andvaranaut</h1>
       <div className="meta">
-        最終更新日:{" "}
-        {transitInformation && transitInformation.lastModified.toISOString()}
+        最終更新日時:{" "}
+        {transitInformation && transitInformation.lastModified.toLocaleString()}
       </div>
       <div className="meta">
         <a href="http://localhost:3333/daily-report-editor/">日報入力</a>
       </div>
-      {days && <Calendar days={days} currentMonth={currentMonth}></Calendar>}
+      {dateEvents && (
+        <Calendar
+          dateEvents={dateEvents}
+          setDateEvents={setDateEvents}
+          currentMonth={currentMonth}
+        ></Calendar>
+      )}
+      <div className="actions">
+        <button
+          disabled={isSaving}
+          onClick={async () => {
+            setIsSaving(true);
+            try {
+              await new PersistenceClient().saveCalendarEvents(token, dateEvents);
+            } finally {
+              setIsSaving(false);
+            }
+          }}
+        >
+          保存
+        </button>
+      </div>
       <div className="card">
         <h2>交通費管理</h2>
 
@@ -118,7 +166,7 @@ const App: FC = () => {
               <div key={month}>
                 <h3>{month}</h3>
                 <div className="text">
-                  出勤回数: {commuteCounts && commuteCounts[month]}
+                  出社回数: {commuteCounts && commuteCounts[month]}
                 </div>
                 <div className="text">
                   徒歩帰宅回数: {walkCounts && walkCounts[month]}
