@@ -35,11 +35,22 @@ type StyleProps = {
 };
 
 const useStyles = createUseStyles<string, StyleProps>({
+  calendar: {
+    display: "grid",
+    width: "100%",
+    gridTemplateColumns: "repeat(7, 102px)",
+    gridGap: "1px",
+    border: "1px solid rgb(187, 187, 187)",
+    backgroundColor: "rgb(187, 187, 187)",
+    boxSizing: "border-box",
+    overflow: "auto",
+    position: "relative",
+  },
   events: {
     display: "grid",
     width: "calc(100% - 12px)",
     gridGap: "3px",
-    gridTemplateColumns: "repeat(auto-fill, 24px)",
+    gridTemplateColumns: "repeat(auto-fill, 28px)",
     justifyContent: "left",
   },
   topLeft: {
@@ -111,7 +122,7 @@ export const Calendar: FC<CalendarProps> = ({ days, currentMonth }) => {
 
   return (
     <>
-      <div className="calendar">
+      <div className={classes.calendar}>
         {daysOfWeeks.map((dayOfWeek, index) => (
           <div className={["day-name", dayOfWeek.color].join(" ")} key={index}>
             {dayOfWeek.name}

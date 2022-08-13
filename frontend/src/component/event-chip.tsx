@@ -6,10 +6,10 @@ const useStyles = createUseStyles({
   eventChip: {
     textAlign: "center",
     padding: "2px",
-    fontSize: "8px",
+    fontSize: "10px",
+    transformOrigin: "center",
     lineHeight: "10px",
     borderRadius: "2px",
-    maxWidth: "20px",
     color: "rgba(255, 255, 255, 0.87)",
   },
   commute: {
