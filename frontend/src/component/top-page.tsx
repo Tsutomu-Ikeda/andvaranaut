@@ -8,6 +8,7 @@ import {
   DateEvent,
   TransitInformation,
 } from "../lib/persistence";
+import { useStableStateExtra } from "react-stable-state";
 import * as env from "../env";
 
 type CommuteStats = {
@@ -19,7 +20,11 @@ type CommuteStats = {
 export const TopPage: FC = () => {
   const currentMonth = "2022-07";
   const { token } = useLogin();
-  const [dateEvents, setDateEvents] = useState<DateEvent[]>();
+  const {
+    state: dateEvents,
+    stableState: stableDateEvents,
+    setState: setDateEvents,
+  } = useStableStateExtra<DateEvent[] | undefined>({ initialState: undefined });
   const [authError, setAuthError] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -46,6 +51,17 @@ export const TopPage: FC = () => {
       }
     })();
   }, [token]);
+
+  useEffect(() => {
+    (async () => {
+      setIsSaving(true);
+      try {
+        await new PersistenceClient().saveCalendarEvents(token, stableDateEvents);
+      } finally {
+        setIsSaving(false);
+      }
+    })();
+  }, [stableDateEvents]);
 
   const {
     costs: totalCommuteCosts,
@@ -142,25 +158,6 @@ export const TopPage: FC = () => {
           currentMonth={currentMonth}
         ></Calendar>
       )}
-      <div className="actions">
-        <Button
-          variant="contained"
-          disabled={isSaving}
-          onClick={async () => {
-            setIsSaving(true);
-            try {
-              await new PersistenceClient().saveCalendarEvents(
-                token,
-                dateEvents
-              );
-            } finally {
-              setIsSaving(false);
-            }
-          }}
-        >
-          保存
-        </Button>
-      </div>
       <div className="card">
         <Typography variant="h2">交通費管理</Typography>
 
