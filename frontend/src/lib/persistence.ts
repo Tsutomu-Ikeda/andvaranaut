@@ -30,7 +30,7 @@ export interface TransitInformation {
 const parseWithDate = (str: string) => {
   const reviver = (_key: string, val: string): Date | string => {
     if (typeof (val) == "string" &&
-      val.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/)) {
+      val.match(/^((?:(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}(?:\.\d+)?))(Z|[\+-]\d{2}:\d{2})?)$/)) {
       return new Date(Date.parse(val));
     }
     return val;
