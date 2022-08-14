@@ -128,6 +128,7 @@ export const DateEditor: FC<DateEditorProps> = ({
       energyDrinkValue: !!events.find((event) =>
         ["energy"].includes(event.type)
       ),
+      workingDay: dateEvents[currentDateEventIndex].workingDay,
     };
   }, [currentDateEventIndex, dateEvents]);
 
@@ -304,6 +305,30 @@ export const DateEditor: FC<DateEditorProps> = ({
         />
       </FormGroup>
       <div style={{ position: "absolute", top: "-5px", right: "-5px" }}>
+        <FormControlLabel
+          sx={{ my: 1 }}
+          control={
+            <Checkbox
+              size="small"
+              checked={currentFormValues?.workingDay}
+              onChange={(e) => {
+                setDateEvents((current) => {
+                  if (current === undefined) return current;
+                  return [
+                    ...current.slice(0, currentDateEventIndex),
+                    {
+                      ...current[currentDateEventIndex],
+                      workingDay: e.target.checked,
+                    },
+                    ...current.slice(currentDateEventIndex + 1),
+                  ];
+                });
+              }}
+            />
+          }
+          label="勤務日"
+        />
+
         <IconButton
           sx={{ my: 1 }}
           onClick={(e) => {
