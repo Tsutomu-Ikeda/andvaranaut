@@ -8,6 +8,7 @@ import {
   DateEvent,
   TransitInformation,
 } from "../lib/persistence";
+import * as env from "../env";
 
 type CommuteStats = {
   costs: { [key: string]: number };
@@ -20,12 +21,19 @@ export const TopPage: FC = () => {
   const { token } = useLogin();
   const [dateEvents, setDateEvents] = useState<DateEvent[]>();
   const [authError, setAuthError] = useState<string>();
+  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [transitInformation, setTransitInformation] =
     useState<TransitInformation>();
 
   useEffect(() => {
     (async () => {
+      if (!token) {
+        setAuthError("ログインしていません");
+        setIsLoading(false);
+        return;
+      }
+
       try {
         setDateEvents(await new PersistenceClient().calendarEvents(token));
         setTransitInformation(
@@ -33,6 +41,8 @@ export const TopPage: FC = () => {
         );
       } catch {
         setAuthError("認証に失敗しました");
+      } finally {
+        setIsLoading(false);
       }
     })();
   }, [token]);
@@ -103,14 +113,13 @@ export const TopPage: FC = () => {
     );
   }, [dateEvents]);
 
+  if (isLoading) return <div>読み込み中...</div>;
+
   if (authError) {
     return (
       <>
         {authError}
-        <br /> 再度{" "}
-        <a href="https://andv.auth.ap-northeast-1.amazoncognito.com/login?response_type=token&client_id=2ugimh4tmganbnn94kk1u6r4p3&redirect_uri=https://andv.tomtsutom.com/login">
-          ログインページ
-        </a>{" "}
+        <br /> 再度 <a href={env.loginPageUrl}>ログインページ</a>{" "}
         からログインしてください
       </>
     );
