@@ -45,7 +45,7 @@ export class PersistenceClient {
     const days: DateEvent[] = parseWithDate(await fetch("/api/date_events", { headers: { Authorization: `Bearer ${token}` } }).then((resp) => resp.text()));
     const lastItem = days.slice(-1)[0]
 
-    if (lastItem.date.getTime() - new Date().getTime() < 7 * 86400 * 1000) {
+    if (lastItem.date.getTime() - new Date().getTime() < 2 * 86400 * 1000) {
       return [...days, ...new Array(7).fill(undefined).map((_, i) => {
         const date = new Date(lastItem.date.getTime() + (i + 1) * 86400 * 1000)
         return { date, events: [], workingDay: [1, 2, 3, 4, 5].includes(date.getDay()), }
