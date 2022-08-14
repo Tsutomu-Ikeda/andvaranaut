@@ -25,3 +25,9 @@ deploy:
 
 build_deploy:
 	make build && make deploy
+
+pull_data:
+	export AWS_PROFILE=${AWS_PROFILE} && aws s3 cp s3://andvaranaut-data/date-events/5ad3f64a-761c-4dc6-ab56-852e56238039.json backend/data/2022-07-26.json
+
+push_data:
+	export AWS_PROFILE=${AWS_PROFILE} && aws s3 cp backend/data/2022-07-26.json s3://andvaranaut-data/date-events/5ad3f64a-761c-4dc6-ab56-852e56238039.json
