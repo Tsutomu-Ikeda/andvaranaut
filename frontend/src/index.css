@@ -32,7 +32,7 @@ div.meta {
   text-align: right;
   ;
   line-height: 1.2em;
-  padding: 0px 0 20px 0;
+  margin-bottom: 5px;
 }
 
 div.text {

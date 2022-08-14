@@ -10,6 +10,7 @@ import {
 } from "../lib/persistence";
 import { useStableStateExtra } from "react-stable-state";
 import * as env from "../env";
+import { PendingBadge } from "./pending-badge";
 
 type CommuteStats = {
   costs: { [key: string]: number };
@@ -24,7 +25,28 @@ export const TopPage: FC = () => {
     state: dateEvents,
     stableState: stableDateEvents,
     setState: setDateEvents,
-  } = useStableStateExtra<DateEvent[] | undefined>({ initialState: undefined });
+    isEditing,
+  } = useStableStateExtra<DateEvent[] | undefined>({
+    initialState: undefined,
+    load: async () => {
+      try {
+        return await new PersistenceClient().calendarEvents(token);
+      } catch (e) {
+        setAuthError("認証に失敗しました");
+      }
+    },
+    onStableStateChanged: async () => {
+      setIsSaving(true);
+      try {
+        await new PersistenceClient().saveCalendarEvents(
+          token,
+          stableDateEvents
+        );
+      } finally {
+        setIsSaving(false);
+      }
+    },
+  });
   const [authError, setAuthError] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -40,7 +62,6 @@ export const TopPage: FC = () => {
       }
 
       try {
-        setDateEvents(await new PersistenceClient().calendarEvents(token));
         setTransitInformation(
           await new PersistenceClient().transitInformation(token)
         );
@@ -51,17 +72,6 @@ export const TopPage: FC = () => {
       }
     })();
   }, [token]);
-
-  useEffect(() => {
-    (async () => {
-      setIsSaving(true);
-      try {
-        await new PersistenceClient().saveCalendarEvents(token, stableDateEvents);
-      } finally {
-        setIsSaving(false);
-      }
-    })();
-  }, [stableDateEvents]);
 
   const {
     costs: totalCommuteCosts,
@@ -147,6 +157,15 @@ export const TopPage: FC = () => {
       <div className="meta">
         最終更新日時:{" "}
         {transitInformation && transitInformation.lastModified.toLocaleString()}
+      </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: "5px",
+        }}
+      >
+        <PendingBadge synced={!isEditing && !isSaving} />
       </div>
       <div className="meta">
         <a href="http://localhost:3333/daily-report-editor/">日報入力</a>
