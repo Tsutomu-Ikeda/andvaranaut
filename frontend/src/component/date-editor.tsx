@@ -10,6 +10,7 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
+  Typography,
 } from "@mui/material";
 import { daysOfWeeks } from "../lib/calendar";
 import { Classes } from "jss";
@@ -132,7 +133,7 @@ export const DateEditor: FC<DateEditorProps> = ({
 
   return (
     <div style={{ position: "relative", width: "100%" }}>
-      <h2>
+      <Typography variant="h2">
         {dateEvents[currentDateEventIndex].date
           .toISOString()
           .slice(0, 10)
@@ -143,7 +144,7 @@ export const DateEditor: FC<DateEditorProps> = ({
             .name
         }
         )
-      </h2>
+      </Typography>
       <div className={classes.events} style={{ margin: "12px 0" }}>
         {dateEvents[currentDateEventIndex].events.map((event, index) => (
           <EventChip event={event} key={index} />

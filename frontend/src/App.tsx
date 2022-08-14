@@ -15,6 +15,17 @@ export const App = () => {
       primary: { main: "#bf0a0a" },
       mode: dark ? "dark" : "light",
     },
+    typography: {
+      fontSize: 16,
+      h1: { fontSize: 52 },
+      h2: { fontSize: 26 },
+      h3: { fontSize: 24 },
+      h4: { fontSize: 22 },
+      h5: { fontSize: 20 },
+      h6: { fontSize: 18 },
+      subtitle1: { fontSize: 18 },
+      body1: { fontSize: 16 },
+    }
   });
 
   return (

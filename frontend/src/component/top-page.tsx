@@ -1,7 +1,7 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import { Calendar } from "./calendar";
 import { useLogin } from "../hooks/use-login";
-import { Button } from "@mui/material"
+import { Button, Typography } from "@mui/material";
 import {
   PersistenceClient,
   CommuteEvent,
@@ -118,7 +118,7 @@ export const TopPage: FC = () => {
 
   return (
     <div className="App" id="App">
-      <h1>Andvaranaut</h1>
+      <Typography variant="h1">Andvaranaut</Typography>
       <div className="meta">
         最終更新日時:{" "}
         {transitInformation && transitInformation.lastModified.toLocaleString()}
@@ -153,7 +153,7 @@ export const TopPage: FC = () => {
         </Button>
       </div>
       <div className="card">
-        <h2>交通費管理</h2>
+        <Typography variant="h2">交通費管理</Typography>
 
         <div className="text">
           合計金額:{" "}
@@ -173,7 +173,7 @@ export const TopPage: FC = () => {
             .filter((key) => new Date(key) >= new Date(currentMonth))
             .map((month) => (
               <div key={month}>
-                <h3>{month}</h3>
+                <Typography variant="h3">{month}</Typography>
                 <div className="text">
                   出社回数: {commuteCounts && commuteCounts[month]}
                 </div>
@@ -193,7 +193,7 @@ export const TopPage: FC = () => {
               </div>
             ))}
         </div>
-        <h2>GEEK SEEK</h2>
+        <Typography variant="h2">GEEK SEEK</Typography>
         {geekSeekCounts && (
           <div className="text">
             合計金額:{" "}
@@ -206,7 +206,7 @@ export const TopPage: FC = () => {
                 .filter(([key]) => new Date(key) >= new Date(currentMonth))
                 .map((geekSeekCount, index) => (
                   <div key={index}>
-                    <h3>{geekSeekCount[0]}</h3>
+                    <Typography variant="h3">{geekSeekCount[0]}</Typography>
                     {geekSeekCount[1].times}回, 小計:{" "}
                     {geekSeekCount[1].amounts.toLocaleString()}円
                   </div>
@@ -214,7 +214,7 @@ export const TopPage: FC = () => {
             </div>
           </div>
         )}
-        <h2>持株会</h2>
+        <Typography variant="h2">持株会</Typography>
       </div>
     </div>
   );
