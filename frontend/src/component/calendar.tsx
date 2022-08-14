@@ -6,6 +6,7 @@ import { createUseStyles } from "react-jss";
 import { useDarkMode } from "../hooks/use-dark-mode";
 import { daysOfWeeks } from "../lib/calendar";
 import { DateEditor } from "./date-editor";
+import { Badge } from "@mui/material/";
 
 const modalContentStyle: (props: StyleProps) => CSSProperties = ({ dark }) => ({
   backgroundColor: dark ? "#242424" : "#fff",
@@ -61,6 +62,12 @@ const theme = {
     position: "absolute",
     left: "6px",
     top: "8px",
+  },
+  topLeftBadge: {
+    position: "absolute",
+    left: "12px",
+    top: "12px",
+    transform: "translateY(-50%) scale(0.7)",
   },
   modalInnerContainer: {
     width: "100%",
@@ -160,10 +167,17 @@ export const Calendar: FC<CalendarProps> = ({
               >
                 {getText(day)}
                 <div className={[classes.events, classes.topLeft].join(" ")}>
-                  {day.events.map((event, index) => (
+                  {day.events.slice(0, 8).map((event, index) => (
                     <EventChip event={event} key={index} disabled={disabled} />
                   ))}
                 </div>
+                {day.events.length > 8 && (
+                  <Badge
+                    badgeContent={day.events.length}
+                    color="primary"
+                    className={classes.topLeftBadge}
+                  />
+                )}
               </div>
             );
           })}
