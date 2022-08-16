@@ -42,7 +42,11 @@ export class PersistenceClient {
   async calendarEvents(token: string): Promise<DateEvent[]> {
     if (!token) return []
 
-    const days: DateEvent[] = parseWithDate(await fetch("/api/date_events", { headers: { Authorization: `Bearer ${token}` } }).then((resp) => resp.text()));
+    const days: DateEvent[] = parseWithDate(await fetch("/api/date_events", { headers: { Authorization: `Bearer ${token}` } }).then((resp) => {
+      if (!resp.ok) throw new Error(resp.statusText)
+      return resp.text()
+    }
+    ));
     const lastItem = days.slice(-1)[0]
 
     if (lastItem.date.getTime() - new Date().getTime() < 2 * 86400 * 1000) {
@@ -58,13 +62,18 @@ export class PersistenceClient {
   async saveCalendarEvents(token: string, data: DateEvent[] | undefined): Promise<void> {
     if (!token || !data) return
 
-    await fetch("/api/date_events", { method: 'post', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(data) })
+    await fetch("/api/date_events", { method: 'post', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(data) }).then((resp) => {
+      if (!resp.ok) throw new Error(resp.statusText)
+    })
   }
 
   async transitInformation(token: string): Promise<TransitInformation> {
     if (!token) return { unitPrice: 1, lastModified: new Date() }
 
-    const data: TransitInformation = parseWithDate(await fetch("/api/transit_information", { headers: { Authorization: `Bearer ${token}` } }).then((resp) => resp.text()));
+    const data: TransitInformation = parseWithDate(await fetch("/api/transit_information", { headers: { Authorization: `Bearer ${token}` } }).then((resp) => {
+      if (!resp.ok) throw new Error(resp.statusText)
+      return resp.text()
+    }));
     return data;
   }
 }

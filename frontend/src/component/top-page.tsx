@@ -62,10 +62,8 @@ export const TopPage: FC = () => {
       }
 
       try {
-        setTransitInformation(
-          await new PersistenceClient().transitInformation(token)
-        );
-      } catch {
+        setTransitInformation(await new PersistenceClient().transitInformation(token));
+      } catch (e) {
         setAuthError("認証に失敗しました");
       } finally {
         setIsLoading(false);
