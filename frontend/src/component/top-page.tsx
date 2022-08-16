@@ -28,6 +28,7 @@ export const TopPage: FC = () => {
     isEditing,
   } = useStableStateExtra<DateEvent[] | undefined>({
     initialState: undefined,
+    delay: 3000,
     load: async () => {
       try {
         return await new PersistenceClient().calendarEvents(token);
