@@ -1,7 +1,7 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import { Calendar } from "./calendar";
 import { useLogin } from "../hooks/use-login";
-import { Button, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import {
   PersistenceClient,
   CommuteEvent,
