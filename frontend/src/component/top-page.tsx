@@ -20,6 +20,7 @@ type CommuteStats = {
 
 export const TopPage: FC = () => {
   const currentMonth = "2022-07";
+  const redirectWaitSeconds = 3;
   const { token } = useLogin();
   const {
     state: dateEvents,
@@ -63,7 +64,9 @@ export const TopPage: FC = () => {
       }
 
       try {
-        setTransitInformation(await new PersistenceClient().transitInformation(token));
+        setTransitInformation(
+          await new PersistenceClient().transitInformation(token)
+        );
       } catch (e) {
         setAuthError("認証に失敗しました");
       } finally {
@@ -137,6 +140,13 @@ export const TopPage: FC = () => {
       {}
     );
   }, [dateEvents]);
+  useEffect(() => {
+    if (authError) {
+      setTimeout(() => {
+        window.location.href = env.loginPageUrl;
+      }, redirectWaitSeconds * 1000);
+    }
+  }, [authError]);
 
   if (isLoading) return <div>読み込み中...</div>;
 
@@ -144,8 +154,11 @@ export const TopPage: FC = () => {
     return (
       <>
         {authError}
-        <br /> 再度 <a href={env.loginPageUrl}>ログインページ</a>{" "}
-        からログインしてください
+        <br />
+        再度 <a href={env.loginPageUrl}>ログインページ</a>{" "}
+        からログインしてください。
+        <br />
+        {redirectWaitSeconds}秒後にリダイレクトします。
       </>
     );
   }
