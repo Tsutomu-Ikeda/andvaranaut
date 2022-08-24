@@ -19,7 +19,7 @@ type CommuteStats = {
 };
 
 export const TopPage: FC = () => {
-  const currentMonth = "2022-07";
+  const currentMonth = "2022-08";
   const redirectWaitSeconds = 3;
   const { token } = useLogin();
   const {
