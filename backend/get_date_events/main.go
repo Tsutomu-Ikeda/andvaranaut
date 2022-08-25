@@ -3,9 +3,12 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -29,11 +32,13 @@ type DateEvent struct {
 }
 
 type ResponseBody struct {
-	DateEvents []DateEvent `json:"dateEvents`
+	DateEvents []DateEvent `json:"dateEvents"`
 }
 
 func handle(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	username := request.RequestContext.Authorizer["claims"].(map[string]interface{})["cognito:username"].(string)
+
+	currentMonth := request.QueryStringParameters["currentMonth"]
 
 	awsSession := session.Must(session.NewSession())
 
@@ -53,11 +58,37 @@ func handle(ctx context.Context, request events.APIGatewayProxyRequest) (events.
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(rc)
 
+	var data []DateEvent
+	var result []DateEvent
+
+	if err := json.Unmarshal(buf.Bytes(), &data); err != nil {
+		panic(err.Error())
+	}
+
+	parts := strings.Split(currentMonth, "-")
+
+	year, _ := strconv.Atoi(parts[0])
+	month, _ := strconv.Atoi(parts[1])
+	currentMonthDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.FixedZone("JST", 9))
+	currentMonthDate = currentMonthDate.AddDate(0, 0, -((int(currentMonthDate.Weekday()) + 6) % 7))
+
+	for _, v := range data {
+		if !v.Date.Before(currentMonthDate) {
+			result = append(result, v)
+		}
+	}
+
+	js, err := json.Marshal(result)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
 	return events.APIGatewayProxyResponse{
 		Headers: map[string]string{
 			"Content-Type": "application/json",
 		},
-		Body:       string(buf.String()),
+		Body:       string(js),
 		StatusCode: 200,
 	}, nil
 }

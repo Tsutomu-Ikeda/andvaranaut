@@ -32,7 +32,7 @@ export const TopPage: FC = () => {
     delay: 3000,
     load: async () => {
       try {
-        return await new PersistenceClient().calendarEvents(token);
+        return await new PersistenceClient().calendarEvents(token, currentMonth);
       } catch (e) {
         setAuthError("認証に失敗しました");
       }

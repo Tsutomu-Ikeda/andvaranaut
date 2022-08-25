@@ -39,10 +39,10 @@ const parseWithDate = (str: string) => {
 };
 
 export class PersistenceClient {
-  async calendarEvents(token: string): Promise<DateEvent[]> {
+  async calendarEvents(token: string, currentMonth: string): Promise<DateEvent[]> {
     if (!token) return []
 
-    const days: DateEvent[] = parseWithDate(await fetch("/api/date_events", { headers: { Authorization: `Bearer ${token}` } }).then((resp) => {
+    const days: DateEvent[] = parseWithDate(await fetch(`/api/date_events?${new URLSearchParams({ currentMonth })}`, { headers: { Authorization: `Bearer ${token}` } }).then((resp) => {
       if (!resp.ok) throw new Error(resp.statusText)
       return resp.text()
     }
