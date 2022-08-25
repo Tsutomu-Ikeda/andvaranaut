@@ -234,8 +234,11 @@ export const TopPage: FC = () => {
         {geekSeekCounts && (
           <div className="text">
             合計金額:{" "}
-            {Object.values(geekSeekCounts)
-              .reduce((prev, geekSeekCount) => prev + geekSeekCount.amounts, 0)
+            {Object.entries(geekSeekCounts)
+              .filter(
+                ([key, _value]) => new Date(key) >= new Date(currentMonth)
+              )
+              .reduce((prev, [_key, geekSeekCount]) => prev + geekSeekCount.amounts, 0)
               .toLocaleString()}
             円
             <div className="details">
