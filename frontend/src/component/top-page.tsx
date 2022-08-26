@@ -42,7 +42,8 @@ export const TopPage: FC = () => {
       try {
         await new PersistenceClient().saveCalendarEvents(
           token,
-          stableDateEvents
+          stableDateEvents,
+          currentMonth
         );
       } finally {
         setIsSaving(false);

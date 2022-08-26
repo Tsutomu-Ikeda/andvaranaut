@@ -59,10 +59,10 @@ export class PersistenceClient {
     return [...days]
   }
 
-  async saveCalendarEvents(token: string, data: DateEvent[] | undefined): Promise<void> {
+  async saveCalendarEvents(token: string, data: DateEvent[] | undefined, currentMonth: string): Promise<void> {
     if (!token || !data) return
 
-    await fetch("/api/date_events", { method: 'post', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(data) }).then((resp) => {
+    await fetch(`/api/date_events?${new URLSearchParams({ currentMonth })}`, { method: 'post', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(data) }).then((resp) => {
       if (!resp.ok) throw new Error(resp.statusText)
     })
   }
