@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -26,17 +28,44 @@ type TransitInformation struct {
 	LastModified time.Time `json:"lastModified"`
 }
 
+func toTime(yearMonth string) time.Time {
+	parts := strings.Split(yearMonth, "-")
+
+	year, _ := strconv.Atoi(parts[0])
+	month, _ := strconv.Atoi(parts[1])
+	currentMonthDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.FixedZone("JST", 9))
+	currentMonthDate = currentMonthDate.AddDate(0, 0, -((int(currentMonthDate.Weekday()) + 6) % 7))
+
+	return currentMonthDate
+}
+
+func getCurrentDateEvents(fileName string) []DateEvent {
+	bytes, err := os.ReadFile(fileName)
+	if err != nil {
+		panic(err.Error())
+	}
+	var dateEvents []DateEvent
+	if err := json.Unmarshal(bytes, &dateEvents); err != nil {
+		panic(err.Error())
+	}
+
+	return dateEvents
+}
+
 func dateEventsHandler(w http.ResponseWriter, r *http.Request) {
+	dateEvents := getCurrentDateEvents("data/2022-07-26.json")
+	currentMonth := r.URL.Query()["currentMonth"][0]
+
 	if r.Method == "GET" {
-		bytes, err := os.ReadFile("data/2022-07-26.json")
-		if err != nil {
-			panic(err.Error())
+		var result []DateEvent
+
+		for _, v := range dateEvents {
+			if !v.Date.Before(toTime(currentMonth)) {
+				result = append(result, v)
+			}
 		}
-		var dateEvents []DateEvent
-		if err := json.Unmarshal(bytes, &dateEvents); err != nil {
-			panic(err.Error())
-		}
-		js, err := json.Marshal(dateEvents)
+
+		js, err := json.Marshal(result)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -47,12 +76,21 @@ func dateEventsHandler(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == "POST" {
 		time.Sleep(5 * time.Second)
 
-		var dateEvents []DateEvent
-		if err := json.NewDecoder(r.Body).Decode(&dateEvents); err != nil {
+		var requestDateEvents []DateEvent
+		if err := json.NewDecoder(r.Body).Decode(&requestDateEvents); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		js, err := json.Marshal(dateEvents)
+		var result []DateEvent
+
+		for _, v := range dateEvents {
+			if v.Date.Before(toTime(currentMonth)) {
+				result = append(result, v)
+			}
+		}
+
+		result = append(result, requestDateEvents...)
+		js, err := json.Marshal(result)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
