@@ -32,7 +32,10 @@ export const TopPage: FC = () => {
     delay: 3000,
     load: async () => {
       try {
-        return await new PersistenceClient().calendarEvents(token, currentMonth);
+        return await new PersistenceClient().calendarEvents(
+          token,
+          currentMonth
+        );
       } catch (e) {
         setAuthError("認証に失敗しました");
       }
@@ -45,6 +48,10 @@ export const TopPage: FC = () => {
           stableDateEvents,
           currentMonth
         );
+        setTransitInformation((current) => {
+          if (current === undefined) return current;
+          return { ...current, lastModified: new Date() };
+        });
       } finally {
         setIsSaving(false);
       }
@@ -239,7 +246,10 @@ export const TopPage: FC = () => {
               .filter(
                 ([key, _value]) => new Date(key) >= new Date(currentMonth)
               )
-              .reduce((prev, [_key, geekSeekCount]) => prev + geekSeekCount.amounts, 0)
+              .reduce(
+                (prev, [_key, geekSeekCount]) => prev + geekSeekCount.amounts,
+                0
+              )
               .toLocaleString()}
             円
             <div className="details">
