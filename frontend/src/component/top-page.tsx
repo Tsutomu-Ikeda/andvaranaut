@@ -20,7 +20,7 @@ type CommuteStats = {
 
 export const TopPage: FC = () => {
   const currentMonth = "2022-08";
-  const redirectWaitSeconds = 3;
+  const redirectWaitSeconds = 1;
   const { token } = useLogin();
   const {
     state: dateEvents,
@@ -166,7 +166,7 @@ export const TopPage: FC = () => {
         再度 <a href={env.loginPageUrl}>ログインページ</a>{" "}
         からログインしてください。
         <br />
-        {redirectWaitSeconds}秒後にリダイレクトします。
+        自動的にリダイレクトします。
       </>
     );
   }
