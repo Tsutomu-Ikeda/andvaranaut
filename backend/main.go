@@ -53,7 +53,7 @@ func getCurrentDateEvents(fileName string) []DateEvent {
 }
 
 func dateEventsHandler(w http.ResponseWriter, r *http.Request) {
-	dateEvents := getCurrentDateEvents("data/2022-07-26.json")
+	dateEvents := getCurrentDateEvents("data/dateEvents.json")
 	currentMonth := r.URL.Query()["currentMonth"][0]
 
 	if r.Method == "GET" {
@@ -98,7 +98,7 @@ func dateEventsHandler(w http.ResponseWriter, r *http.Request) {
 		if err := os.MkdirAll("data", 0755); err != nil {
 			panic(err.Error())
 		}
-		if err := os.WriteFile("data/2022-07-26.json", js, 0644); err != nil {
+		if err := os.WriteFile("data/dateEvents.json", js, 0644); err != nil {
 			panic(err.Error())
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -118,7 +118,7 @@ func transitInformationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// ファイルから最終更新日時を取得する
 	fileInfo,
-		err := os.Stat("data/2022-07-26.json")
+		err := os.Stat("data/dateEvents.json")
 	if err != nil {
 		panic(err.Error())
 	}
