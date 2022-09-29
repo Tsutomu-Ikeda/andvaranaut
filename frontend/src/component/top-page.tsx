@@ -57,6 +57,7 @@ export const TopPage: FC = () => {
       }
     },
   });
+  const today = new Date();
   const [authError, setAuthError] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -89,7 +90,7 @@ export const TopPage: FC = () => {
     walkCounts,
   }: CommuteStats = useMemo<CommuteStats | undefined>(() => {
     if (!transitInformation) return { costs: {}, counts: {}, walkCounts: {} };
-    const data = dateEvents?.reduce<CommuteStats>(
+    const data = dateEvents?.filter((dateEvent) => dateEvent.date <= today).reduce<CommuteStats>(
       (prev, current) => {
         const commuteEvent: CommuteEvent | undefined = current.events.find(
           (event) => event.type == "commute"
