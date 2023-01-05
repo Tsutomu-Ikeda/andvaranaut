@@ -48,6 +48,10 @@ const allEvents: Event[] = [
     name: "ENG",
     type: "energy",
   },
+  {
+    name: "糠漬",
+    type: "nuka",
+  },
 ];
 
 const updateEvent = (
@@ -128,6 +132,7 @@ export const DateEditor: FC<DateEditorProps> = ({
       energyDrinkValue: !!events.find((event) =>
         ["energy"].includes(event.type)
       ),
+      nukaValue: !!events.find((event) => ["nuka"].includes(event.type)),
       workingDay: dateEvents[currentDateEventIndex].workingDay,
     };
   }, [currentDateEventIndex, dateEvents]);
@@ -292,7 +297,7 @@ export const DateEditor: FC<DateEditorProps> = ({
                 setDateEvents((current) => {
                   if (current === undefined) return current;
                   return updateEvent(current, currentDateEventIndex, [
-                    ...(e.target.checked ? [{ type: "energy" } as any] : []),
+                    ...(e.target.checked ? [{ type: "energy" } as Event] : []),
                     ...current[currentDateEventIndex].events.filter(
                       (event) => !["energy"].includes(event.type)
                     ),
@@ -302,6 +307,26 @@ export const DateEditor: FC<DateEditorProps> = ({
             />
           }
           label="エナドリを飲んだ"
+        />
+        <FormControlLabel
+          sx={{ my: 1 }}
+          control={
+            <Checkbox
+              checked={currentFormValues?.nukaValue}
+              onChange={(e) => {
+                setDateEvents((current) => {
+                  if (current === undefined) return current;
+                  return updateEvent(current, currentDateEventIndex, [
+                    ...(e.target.checked ? [{ type: "nuka" } as Event] : []),
+                    ...current[currentDateEventIndex].events.filter(
+                      (event) => !["nuka"].includes(event.type)
+                    ),
+                  ]);
+                });
+              }}
+            />
+          }
+          label="ぬか漬けを混ぜた"
         />
       </FormGroup>
       <div style={{ position: "absolute", top: "-5px", right: "-5px" }}>

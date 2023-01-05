@@ -12,7 +12,7 @@ export type CommuteEvent = {
 
 export type Event = GeekSeekEvent | CommuteEvent | {
   name: string;
-  type: "remote" | "walking" | "drinking" | "energy";
+  type: "remote" | "walking" | "drinking" | "energy" | "nuka";
   amounts?: undefined;
 };
 

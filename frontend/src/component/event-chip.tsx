@@ -27,6 +27,9 @@ const useStyles = createUseStyles({
   energy: {
     backgroundColor: "#8121bd",
   },
+  nuka: {
+    backgroundColor: "#bdba21",
+  },
   "geek-seek": {
     backgroundColor: "#21adbd",
   },
