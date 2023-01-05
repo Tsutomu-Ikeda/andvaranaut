@@ -1,6 +1,6 @@
 import { FC, useMemo } from "react";
 import { EventChip } from "./event-chip";
-import { DateEvent, Event } from "../lib/persistence";
+import { DateEvent, DrinkEvent, Event } from "../lib/persistence";
 import {
   Checkbox,
   FormControlLabel,
@@ -43,6 +43,7 @@ const allEvents: Event[] = [
   {
     name: "*",
     type: "drinking",
+    amounts: 0,
   },
   {
     name: "ENG",
@@ -81,6 +82,11 @@ const updateEvent = (
           return {
             type: "drinking",
             name: newEvents.find((event) => event.type === "drinking")?.name,
+            amounts: (
+              newEvents.find((event) => event.type === "drinking") as
+                | DrinkEvent
+                | undefined
+            )?.amounts,
           } as Event;
 
         return event;
@@ -129,6 +135,9 @@ export const DateEditor: FC<DateEditorProps> = ({
       ),
       drinkingName: events.find((event) => ["drinking"].includes(event.type))
         ?.name,
+      drinkingAmounts: (
+        events.find((event) => ["drinking"].includes(event.type)) as DrinkEvent | undefined
+      )?.amounts,
       energyDrinkValue: !!events.find((event) =>
         ["energy"].includes(event.type)
       ),
@@ -257,7 +266,7 @@ export const DateEditor: FC<DateEditorProps> = ({
                   if (current === undefined) return current;
                   return updateEvent(current, currentDateEventIndex, [
                     ...(e.target.checked
-                      ? [{ type: "drinking", name: "飲酒" } as any]
+                      ? [{ type: "drinking", name: "飲酒", amounts: 14 } as DrinkEvent]
                       : []),
                     ...current[currentDateEventIndex].events.filter(
                       (event) => !["drinking"].includes(event.type)
@@ -277,8 +286,41 @@ export const DateEditor: FC<DateEditorProps> = ({
             onChange={(e) => {
               setDateEvents((current) => {
                 if (current === undefined) return current;
+                const updateTarget = current[currentDateEventIndex].events.find(
+                  (event) => event.type === "drinking"
+                ) as DrinkEvent | undefined;
                 return updateEvent(current, currentDateEventIndex, [
-                  { type: "drinking", name: e.target.value } as any,
+                  {
+                    type: "drinking",
+                    name: e.target.value,
+                    amounts: updateTarget?.amounts,
+                  } as DrinkEvent,
+                  ...current[currentDateEventIndex].events.filter(
+                    (event) => !["drinking"].includes(event.type)
+                  ),
+                ]);
+              });
+            }}
+          />
+        )}
+        {currentFormValues?.drinkingValue && (
+          <TextField
+            sx={{ my: 1, mx: 2 }}
+            type="number"
+            label="飲酒量 (mg)"
+            value={currentFormValues.drinkingAmounts}
+            onChange={(e) => {
+              setDateEvents((current) => {
+                if (current === undefined) return current;
+                const updateTarget = current[currentDateEventIndex].events.find(
+                  (event) => event.type === "drinking"
+                );
+                return updateEvent(current, currentDateEventIndex, [
+                  {
+                    type: "drinking",
+                    amounts: Number(e.target.value),
+                    name: updateTarget?.name,
+                  } as DrinkEvent,
                   ...current[currentDateEventIndex].events.filter(
                     (event) => !["drinking"].includes(event.type)
                   ),
