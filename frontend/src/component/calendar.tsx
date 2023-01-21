@@ -72,7 +72,7 @@ const theme = {
     width: "100%",
     padding: "20px",
   },
-  dayName: {
+  dayName: (props: StyleProps) => ({
     position: "absolute",
     width: "102px",
     height: "30px",
@@ -81,9 +81,9 @@ const theme = {
     textAlign: "center",
     lineHeight: "30px",
     fontWeight: 500,
-    backgroundColor: "rgb(56, 56, 56)",
+    backgroundColor: props.dark ? "rgb(56, 56, 56)" : "rgb(250, 250, 250)",
     userSelect: "none",
-  },
+  }),
   blue: (props: StyleProps) => ({
     color: props.dark ? "rgb(126, 145, 242)" : "rgb(38, 101, 236)",
   }),
@@ -159,7 +159,7 @@ export const Calendar: FC<CalendarProps> = ({
         ))}
         <div
           style={{
-            color: "#fff",
+            color: dark ? "rgba(255, 255, 255, 0.87)" : "#213547",
             backgroundColor: "transparent",
             position: "absolute",
             width: "102px",
