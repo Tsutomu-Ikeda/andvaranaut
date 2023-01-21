@@ -6,7 +6,7 @@ import { createUseStyles } from "react-jss";
 import { useDarkMode } from "../hooks/use-dark-mode";
 import { daysOfWeeks } from "../lib/calendar";
 import { DateEditor } from "./date-editor";
-import { Badge } from "@mui/material/";
+import { Badge, Checkbox, FormControlLabel } from "@mui/material/";
 
 const modalContentStyle: (props: StyleProps) => CSSProperties = ({ dark }) => ({
   backgroundColor: dark ? "#242424" : "#fff",
@@ -127,6 +127,14 @@ export const Calendar: FC<CalendarProps> = ({
   const [currentDateEventIndex, setCurrentDateEventIndex] = useState<
     number | undefined
   >();
+  const [displayEventTags, setDisplayEventTags] = useState<{
+    [key: string]: { enabled: boolean; label: string };
+  }>({
+    commute: { enabled: true, label: "出社" },
+    remote: { enabled: true, label: "在宅" },
+    drinking: { enabled: true, label: "飲酒量" },
+    other: { enabled: true, label: "その他" },
+  });
   const { dark } = useDarkMode();
   const classes = useStyles({ dark });
   const getText = (dateEvent: DateEvent) => {
@@ -232,15 +240,26 @@ export const Calendar: FC<CalendarProps> = ({
                       <div
                         className={[classes.events, classes.topLeft].join(" ")}
                       >
-                        {day.events.slice(0, 8).map((event, index) => (
-                          <EventChip
-                            event={event}
-                            key={index}
-                            disabled={disabled}
-                          />
-                        ))}
+                        {day.events
+                          .filter(
+                            (event) =>
+                              displayEventTags[event.type as string]?.enabled ??
+                              displayEventTags.other.enabled
+                          )
+                          .slice(0, 8)
+                          .map((event, index) => (
+                            <EventChip
+                              event={event}
+                              key={index}
+                              disabled={disabled}
+                            />
+                          ))}
                       </div>
-                      {day.events.length > 8 && (
+                      {day.events.filter(
+                        (event) =>
+                          displayEventTags[event.type as string]?.enabled ??
+                          displayEventTags.other.enabled
+                      ).length > 8 && (
                         <Badge
                           badgeContent={day.events.length}
                           color="primary"
@@ -275,6 +294,33 @@ export const Calendar: FC<CalendarProps> = ({
               ];
               return elements;
             })}
+      </div>
+      <div>
+        {Object.entries(displayEventTags).map(([key, value]) => {
+          return (
+            <FormControlLabel
+              sx={{ my: 1 }}
+              key={key}
+              control={
+                <Checkbox
+                  checked={value.enabled}
+                  onChange={(e) => {
+                    setDisplayEventTags((current) => {
+                      current[key] = {
+                        enabled: e.target.checked,
+                        label: value.label,
+                      };
+                      return {
+                        ...current,
+                      };
+                    });
+                  }}
+                />
+              }
+              label={value.label}
+            />
+          );
+        })}
       </div>
       <Modal
         isOpen={currentDateEventIndex !== undefined}
