@@ -22,12 +22,14 @@ const modalContentStyle: (props: StyleProps) => CSSProperties = ({ dark }) => ({
   borderRadius: "5px",
 });
 const dayBaseStyle: CSSProperties = {
+  width: "102px",
+  height: "66px",
+  position: "absolute",
   textAlign: "right",
   padding: "45px 10px 3px",
   letterSpacing: "1px",
   fontSize: "12px",
   boxSizing: "border-box",
-  position: "relative",
   userSelect: "none",
 };
 
@@ -37,14 +39,11 @@ type StyleProps = {
 
 const theme = {
   calendar: {
-    display: "grid",
-    width: "100%",
-    gridTemplateColumns: "repeat(7, 102px)",
+    width: (102 + 1) * 7 + 1,
     gridGap: "1px",
     border: "1px solid rgb(187, 187, 187)",
     backgroundColor: "rgb(187, 187, 187)",
     boxSizing: "border-box",
-    overflow: "auto",
     position: "relative",
   },
   events: {
@@ -72,6 +71,18 @@ const theme = {
   modalInnerContainer: {
     width: "100%",
     padding: "20px",
+  },
+  dayName: {
+    position: "absolute",
+    width: "102px",
+    height: "30px",
+    top: "0px",
+    fontSize: "12px",
+    textAlign: "center",
+    lineHeight: "30px",
+    fontWeight: 500,
+    backgroundColor: "rgb(56, 56, 56)",
+    userSelect: "none",
   },
   blue: (props: StyleProps) => ({
     color: props.dark ? "rgb(126, 145, 242)" : "rgb(38, 101, 236)",
@@ -128,59 +139,142 @@ export const Calendar: FC<CalendarProps> = ({
 
   return (
     <>
-      <div className={classes.calendar}>
+      <div
+        className={classes.calendar}
+        style={{ height: ((dateEvents?.length ?? 0) / 7) * (66 + 1) + 32 }}
+      >
         {daysOfWeeks.map((dayOfWeek, index) => (
           <div
             className={[
-              "day-name",
+              classes.dayName,
               ...(dayOfWeek.color !== undefined
                 ? [classes[dayOfWeek.color]]
                 : []),
             ].join(" ")}
+            style={{ left: index * (102 + 1) }}
             key={index}
           >
             {dayOfWeek.name}
           </div>
         ))}
+        <div
+          style={{
+            color: "#fff",
+            backgroundColor: "transparent",
+            position: "absolute",
+            width: "102px",
+            top: 0,
+            left: 7 * (102 + 1),
+            fontSize: "12px",
+            textAlign: "center",
+            lineHeight: "30px",
+            fontWeight: 500,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          週の飲酒量
+        </div>
         {dateEvents &&
-          dateEvents.map((day, index) => {
-            const disabled = day.date && day.date < new Date(currentMonth);
-            return (
-              <div
-                className={
-                  disabled
-                    ? classes.disabledDay
-                    : day.workingDay
-                    ? classes.day
-                    : classes.holiday
-                }
-                key={index}
-                onClick={
-                  !disabled
-                    ? (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setCurrentDateEventIndex(index);
+          new Array(dateEvents.length / 7)
+            .fill(undefined)
+            .map((_undefined, weekIndex) => {
+              const weekEvents = dateEvents.slice(
+                weekIndex * 7,
+                (weekIndex + 1) * 7
+              );
+
+              const alcoholAmount =
+                weekEvents[0].date.getFullYear() >= 2023
+                  ? weekEvents.reduce(
+                      (sum, date) =>
+                        sum +
+                        date.events
+                          .map((event) =>
+                            event.type === "drinking" ? event.amounts ?? 0 : 0
+                          )
+                          .reduce((dateSum, val) => dateSum + val, 0),
+                      0
+                    )
+                  : undefined;
+
+              const elements = [
+                ...weekEvents.map((day, index) => {
+                  const disabled =
+                    day.date && day.date < new Date(currentMonth);
+                  return (
+                    <div
+                      className={
+                        disabled
+                          ? classes.disabledDay
+                          : day.workingDay
+                          ? classes.day
+                          : classes.holiday
                       }
-                    : undefined
-                }
-              >
-                {getText(day)}
-                <div className={[classes.events, classes.topLeft].join(" ")}>
-                  {day.events.slice(0, 8).map((event, index) => (
-                    <EventChip event={event} key={index} disabled={disabled} />
-                  ))}
-                </div>
-                {day.events.length > 8 && (
-                  <Badge
-                    badgeContent={day.events.length}
-                    color="primary"
-                    className={classes.topLeftBadge}
-                  />
-                )}
-              </div>
-            );
-          })}
+                      style={{
+                        left: index * (102 + 1),
+                        top: weekIndex * (66 + 1) + 31,
+                      }}
+                      key={index}
+                      onClick={
+                        !disabled
+                          ? (e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setCurrentDateEventIndex(index + weekIndex * 7);
+                            }
+                          : undefined
+                      }
+                    >
+                      {getText(day)}
+                      <div
+                        className={[classes.events, classes.topLeft].join(" ")}
+                      >
+                        {day.events.slice(0, 8).map((event, index) => (
+                          <EventChip
+                            event={event}
+                            key={index}
+                            disabled={disabled}
+                          />
+                        ))}
+                      </div>
+                      {day.events.length > 8 && (
+                        <Badge
+                          badgeContent={day.events.length}
+                          color="primary"
+                          className={classes.topLeftBadge}
+                        />
+                      )}
+                    </div>
+                  );
+                }),
+                <div
+                  key={7}
+                  style={{
+                    width: "102px",
+                    height: "66px",
+                    position: "absolute",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    top: weekIndex * (66 + 1) + 31,
+                    left: (102 + 1) * 7,
+                    fontSize: "12px",
+                    textAlign: "center",
+                    lineHeight: "30px",
+                    fontWeight: 500,
+                  }}
+                >
+                  {alcoholAmount !== undefined
+                    ? `${alcoholAmount} mg`
+                    : undefined}
+                </div>,
+              ];
+              return elements;
+            })}
       </div>
       <Modal
         isOpen={currentDateEventIndex !== undefined}

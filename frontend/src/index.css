@@ -51,17 +51,6 @@ body {
   min-height: 100vh;
 }
 
-.day-name {
-  font-size: 12px;
-  text-transform: uppercase;
-  height: 30px;
-  text-align: center;
-  line-height: 30px;
-  font-weight: 500;
-  background-color: rgb(56, 56, 56);
-  user-select: none;
-}
-
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -74,9 +63,5 @@ body {
 
   button {
     background-color: #f9f9f9;
-  }
-
-  .day-name {
-    background-color: rgb(250, 250, 250);
   }
 }
