@@ -12,7 +12,9 @@ import { JssStyle } from "jss";
 const style: (s: JssStyle) => JssStyle = (s) => s;
 
 const dateWidth = 102,
-  dateHeight = 66, dateGapSize = 1, dayNameHeight = 30;
+  dateHeight = 66,
+  dateGapSize = 1,
+  dayNameHeight = 30;
 
 const DateText: React.FC<{ dateEvent: DateEvent; today: Date }> = ({
   dateEvent,
@@ -26,6 +28,10 @@ const DateText: React.FC<{ dateEvent: DateEvent; today: Date }> = ({
 
     return dateEvent.date?.getDate?.();
   };
+
+  const isToday =
+    new Date(dateEvent.date).setHours(0, 0, 0, 0) ==
+    new Date(today).setHours(0, 0, 0, 0);
 
   return (
     <div
@@ -42,11 +48,8 @@ const DateText: React.FC<{ dateEvent: DateEvent; today: Date }> = ({
           minWidth: `${currentDateChipSize}px`,
           height: `${currentDateChipSize}px`,
           borderRadius: `${currentDateChipSize / 2}px`,
-          backgroundColor:
-            new Date(dateEvent.date).setHours(0, 0, 0, 0) ==
-            new Date(today).setHours(0, 0, 0, 0)
-              ? "#A30000"
-              : undefined,
+          backgroundColor: isToday ? "#bf0a0a" : undefined,
+          color: isToday ? "#fff" : undefined,
           padding: "0px 6px",
           display: "flex",
           justifyContent: "center",
@@ -195,7 +198,10 @@ export const Calendar: FC<CalendarProps> = ({
       <div
         className={classes.calendar}
         style={{
-          height: ((dateEvents?.length ?? 0) / 7) * (dateHeight + dateGapSize) + dayNameHeight + dateGapSize * 2,
+          height:
+            ((dateEvents?.length ?? 0) / 7) * (dateHeight + dateGapSize) +
+            dayNameHeight +
+            dateGapSize * 2,
         }}
       >
         {daysOfWeeks.map((dayOfWeek, index) => (
@@ -206,7 +212,10 @@ export const Calendar: FC<CalendarProps> = ({
                 ? [classes[dayOfWeek.color]]
                 : []),
             ].join(" ")}
-            style={{ top: dateGapSize, left: index * (dateWidth + dateGapSize) + dateGapSize }}
+            style={{
+              top: dateGapSize,
+              left: index * (dateWidth + dateGapSize) + dateGapSize,
+            }}
             key={index}
           >
             {dayOfWeek.name}
@@ -274,7 +283,10 @@ export const Calendar: FC<CalendarProps> = ({
                       ].join(" ")}
                       style={{
                         left: index * (dateWidth + dateGapSize) + dateGapSize,
-                        top: weekIndex * (dateHeight + dateGapSize) + dayNameHeight + dateGapSize * 2,
+                        top:
+                          weekIndex * (dateHeight + dateGapSize) +
+                          dayNameHeight +
+                          dateGapSize * 2,
                       }}
                       key={index}
                       onClick={
@@ -330,7 +342,10 @@ export const Calendar: FC<CalendarProps> = ({
                     flexDirection: "column",
                     justifyContent: "center",
                     alignItems: "center",
-                    top: weekIndex * (dateHeight + dateGapSize) + dayNameHeight + dateGapSize * 2,
+                    top:
+                      weekIndex * (dateHeight + dateGapSize) +
+                      dayNameHeight +
+                      dateGapSize * 2,
                     left: (dateWidth + dateGapSize) * 7 + dateGapSize,
                     fontSize: "12px",
                     textAlign: "center",
