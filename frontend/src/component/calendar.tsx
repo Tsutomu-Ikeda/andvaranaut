@@ -7,6 +7,57 @@ import { useDarkMode } from "../hooks/use-dark-mode";
 import { daysOfWeeks } from "../lib/calendar";
 import { DateEditor } from "./date-editor";
 import { Badge, Checkbox, FormControlLabel } from "@mui/material/";
+import { JssStyle } from "jss";
+
+const style: (s: JssStyle) => JssStyle = (s) => s;
+
+const dateWidth = 102,
+  dateHeight = 66, dateGapSize = 1, dayNameHeight = 30;
+
+const DateText: React.FC<{ dateEvent: DateEvent; today: Date }> = ({
+  dateEvent,
+  today,
+}) => {
+  const currentDateChipSize = 20;
+  const getText = (dateEvent: DateEvent) => {
+    if (dateEvent.date?.getDate?.() == 1) {
+      return `${dateEvent.date.getMonth() + 1}/${dateEvent.date.getDate()}`;
+    }
+
+    return dateEvent.date?.getDate?.();
+  };
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        width: "100%",
+        height: "100%",
+        justifyContent: "right",
+        alignItems: "end",
+      }}
+    >
+      <div
+        style={{
+          minWidth: `${currentDateChipSize}px`,
+          height: `${currentDateChipSize}px`,
+          borderRadius: `${currentDateChipSize / 2}px`,
+          backgroundColor:
+            new Date(dateEvent.date).setHours(0, 0, 0, 0) ==
+            new Date(today).setHours(0, 0, 0, 0)
+              ? "#A30000"
+              : undefined,
+          padding: "0px 6px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        {getText(dateEvent)}
+      </div>
+    </div>
+  );
+};
 
 const modalContentStyle: (props: StyleProps) => CSSProperties = ({ dark }) => ({
   backgroundColor: dark ? "#242424" : "#fff",
@@ -21,15 +72,14 @@ const modalContentStyle: (props: StyleProps) => CSSProperties = ({ dark }) => ({
   maxHeight: "90vh",
   borderRadius: "5px",
 });
-const dayBaseStyle: CSSProperties = {
-  width: "102px",
-  height: "66px",
+const dayBaseStyle: JssStyle = {
+  width: `${dateWidth}px`,
+  height: `${dateHeight}px`,
   position: "absolute",
   textAlign: "right",
-  padding: "45px 10px 3px",
-  letterSpacing: "1px",
+  padding: "5px 3px",
+  letterSpacing: `${dateGapSize}px`,
   fontSize: "12px",
-  boxSizing: "border-box",
   userSelect: "none",
 };
 
@@ -38,71 +88,72 @@ type StyleProps = {
 };
 
 const theme = {
-  calendar: {
-    width: (102 + 1) * 7 + 1,
-    gridGap: "1px",
-    border: "1px solid rgb(187, 187, 187)",
+  calendar: style({
+    width: (dateWidth + dateGapSize) * 7 + dateGapSize,
     backgroundColor: "rgb(187, 187, 187)",
-    boxSizing: "border-box",
     position: "relative",
-  },
-  events: {
+  }),
+  events: style({
     display: "grid",
     width: "calc(100% - 12px)",
     height: "10px",
     gridGap: "3px",
     gridTemplateColumns: "repeat(auto-fill, 28px)",
     justifyContent: "left",
-  },
-  formGroup: {
+  }),
+  formGroup: style({
     margin: "20px 0",
-  },
-  topLeft: {
+  }),
+  topLeft: style({
     position: "absolute",
     left: "6px",
     top: "8px",
-  },
-  topLeftBadge: {
+  }),
+  topLeftBadge: style({
     position: "absolute",
     left: "12px",
     top: "12px",
     transform: "translateY(-50%) scale(0.7)",
-  },
-  modalInnerContainer: {
+  }),
+  modalInnerContainer: style({
     width: "100%",
     padding: "20px",
-  },
-  dayName: (props: StyleProps) => ({
+  }),
+  dayName: (props: StyleProps): JssStyle => ({
     position: "absolute",
-    width: "102px",
-    height: "30px",
+    width: `${dateWidth}px`,
+    height: `${dayNameHeight}px`,
     top: "0px",
     fontSize: "12px",
     textAlign: "center",
-    lineHeight: "30px",
+    lineHeight: `${dayNameHeight}px`,
     fontWeight: 500,
     backgroundColor: props.dark ? "rgb(56, 56, 56)" : "rgb(250, 250, 250)",
     userSelect: "none",
   }),
-  blue: (props: StyleProps) => ({
+  blue: (props: StyleProps): JssStyle => ({
     color: props.dark ? "rgb(126, 145, 242)" : "rgb(38, 101, 236)",
   }),
-  red: (props: StyleProps) => ({
+  red: (props: StyleProps): JssStyle => ({
     color: props.dark ? "rgb(248, 106, 106)" : "rgb(229, 44, 44)",
   }),
-  day: (props: StyleProps) => ({
+  day: (props: StyleProps): JssStyle => ({
     ...dayBaseStyle,
     backgroundColor: props.dark ? "#333" : "#fff",
     "&:hover": {
       backgroundColor: props.dark ? "#666" : "#ddd",
     },
   }),
-  disabledDay: (props: StyleProps) => ({
+  disabledDay: (props: StyleProps): JssStyle => ({
     ...dayBaseStyle,
     color: props.dark ? "#ffffff4C" : "#21354788",
     backgroundColor: props.dark ? "rgba(56, 56, 56, 0.87)" : "#ccc",
   }),
-  holiday: (props: StyleProps) => ({
+  futureDay: style({
+    ...dayBaseStyle,
+    opacity: 0.8,
+  }),
+  holiday: (props: StyleProps): JssStyle => ({
     ...dayBaseStyle,
     backgroundColor: props.dark ? "#555" : "#eee",
     "&:hover": {
@@ -136,20 +187,16 @@ export const Calendar: FC<CalendarProps> = ({
     other: { enabled: true, label: "その他" },
   });
   const { dark } = useDarkMode();
+  const today = new Date();
   const classes = useStyles({ dark });
-  const getText = (dateEvent: DateEvent) => {
-    if (dateEvent.date?.getDate?.() == 1) {
-      return `${dateEvent.date.getMonth() + 1}/${dateEvent.date.getDate()}`;
-    }
-
-    return dateEvent.date?.getDate?.();
-  };
 
   return (
     <>
       <div
         className={classes.calendar}
-        style={{ height: ((dateEvents?.length ?? 0) / 7) * (66 + 1) + 32 }}
+        style={{
+          height: ((dateEvents?.length ?? 0) / 7) * (dateHeight + dateGapSize) + dayNameHeight + dateGapSize * 2,
+        }}
       >
         {daysOfWeeks.map((dayOfWeek, index) => (
           <div
@@ -159,7 +206,7 @@ export const Calendar: FC<CalendarProps> = ({
                 ? [classes[dayOfWeek.color]]
                 : []),
             ].join(" ")}
-            style={{ left: index * (102 + 1) }}
+            style={{ top: dateGapSize, left: index * (dateWidth + dateGapSize) + dateGapSize }}
             key={index}
           >
             {dayOfWeek.name}
@@ -170,12 +217,12 @@ export const Calendar: FC<CalendarProps> = ({
             color: dark ? "rgba(255, 255, 255, 0.87)" : "#213547",
             backgroundColor: "transparent",
             position: "absolute",
-            width: "102px",
-            top: 0,
-            left: 7 * (102 + 1),
+            width: `${dateWidth}px`,
+            top: dateGapSize,
+            left: 7 * (dateWidth + dateGapSize) + dateGapSize,
             fontSize: "12px",
             textAlign: "center",
-            lineHeight: "30px",
+            lineHeight: `${dayNameHeight}px`,
             fontWeight: 500,
             display: "flex",
             flexDirection: "column",
@@ -214,16 +261,20 @@ export const Calendar: FC<CalendarProps> = ({
                     day.date && day.date < new Date(currentMonth);
                   return (
                     <div
-                      className={
+                      className={[
                         disabled
                           ? classes.disabledDay
                           : day.workingDay
                           ? classes.day
-                          : classes.holiday
-                      }
+                          : classes.holiday,
+                        ...(new Date(day.date).setHours(0, 0, 0, 0) >
+                        new Date(today).setHours(0, 0, 0, 0)
+                          ? [classes.futureDay]
+                          : []),
+                      ].join(" ")}
                       style={{
-                        left: index * (102 + 1),
-                        top: weekIndex * (66 + 1) + 31,
+                        left: index * (dateWidth + dateGapSize) + dateGapSize,
+                        top: weekIndex * (dateHeight + dateGapSize) + dayNameHeight + dateGapSize * 2,
                       }}
                       key={index}
                       onClick={
@@ -236,7 +287,7 @@ export const Calendar: FC<CalendarProps> = ({
                           : undefined
                       }
                     >
-                      {getText(day)}
+                      <DateText dateEvent={day} today={today} />
                       <div
                         className={[classes.events, classes.topLeft].join(" ")}
                       >
@@ -272,18 +323,18 @@ export const Calendar: FC<CalendarProps> = ({
                 <div
                   key={7}
                   style={{
-                    width: "102px",
-                    height: "66px",
+                    width: `${dateWidth}px`,
+                    height: `${dateHeight}px`,
                     position: "absolute",
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "center",
                     alignItems: "center",
-                    top: weekIndex * (66 + 1) + 31,
-                    left: (102 + 1) * 7,
+                    top: weekIndex * (dateHeight + dateGapSize) + dayNameHeight + dateGapSize * 2,
+                    left: (dateWidth + dateGapSize) * 7 + dateGapSize,
                     fontSize: "12px",
                     textAlign: "center",
-                    lineHeight: "30px",
+                    lineHeight: `${dayNameHeight}px`,
                     fontWeight: 500,
                   }}
                 >
