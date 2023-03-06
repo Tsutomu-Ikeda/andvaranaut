@@ -196,7 +196,7 @@ export const TopPage: FC = () => {
           dateEvents={dateEvents}
           setDateEvents={setDateEvents}
           currentMonth={currentMonth}
-        ></Calendar>
+        />
       )}
       <div className="card">
         <Typography variant="h2">交通費管理</Typography>
