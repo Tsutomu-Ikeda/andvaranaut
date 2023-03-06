@@ -136,7 +136,9 @@ export const DateEditor: FC<DateEditorProps> = ({
       drinkingName: events.find((event) => ["drinking"].includes(event.type))
         ?.name,
       drinkingAmounts: (
-        events.find((event) => ["drinking"].includes(event.type)) as DrinkEvent | undefined
+        events.find((event) => ["drinking"].includes(event.type)) as
+          | DrinkEvent
+          | undefined
       )?.amounts,
       energyDrinkValue: !!events.find((event) =>
         ["energy"].includes(event.type)
@@ -173,7 +175,7 @@ export const DateEditor: FC<DateEditorProps> = ({
               <Select
                 id="work-type-select"
                 labelId="work-type-select-label"
-                value={currentFormValues?.workTypeValue}
+                value={currentFormValues?.workTypeValue ?? ""}
                 label="勤務種別"
                 onChange={(e) => {
                   setDateEvents((current) => {
@@ -266,7 +268,13 @@ export const DateEditor: FC<DateEditorProps> = ({
                   if (current === undefined) return current;
                   return updateEvent(current, currentDateEventIndex, [
                     ...(e.target.checked
-                      ? [{ type: "drinking", name: "飲酒", amounts: 14 } as DrinkEvent]
+                      ? [
+                          {
+                            type: "drinking",
+                            name: "飲酒",
+                            amounts: 14,
+                          } as DrinkEvent,
+                        ]
                       : []),
                     ...current[currentDateEventIndex].events.filter(
                       (event) => !["drinking"].includes(event.type)
