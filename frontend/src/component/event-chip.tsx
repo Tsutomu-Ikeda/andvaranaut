@@ -10,32 +10,6 @@ const useStyles = createUseStyles({
     transformOrigin: "center",
     lineHeight: "10px",
     borderRadius: "2px",
-    color: "rgba(255, 255, 255, 0.87)",
-  },
-  commute: {
-    backgroundColor: "#347d3c",
-  },
-  remote: {
-    backgroundColor: "#bc3737",
-  },
-  walking: {
-    backgroundColor: "#948917",
-  },
-  drinking: {
-    backgroundColor: "#bd7221",
-  },
-  energy: {
-    backgroundColor: "#8121bd",
-  },
-  nuka: {
-    backgroundColor: "#bdba21",
-  },
-  "geek-seek": {
-    backgroundColor: "#21adbd",
-  },
-  disabled: {
-    color: "#ffffff4C",
-    backgroundColor: "rgba(56, 56, 56, 0.3)",
   },
 });
 
@@ -44,13 +18,40 @@ type EventChipProps = { event: Event; disabled?: boolean };
 export const EventChip: FC<EventChipProps> = ({ event, disabled }) => {
   const classes = useStyles();
 
+  const getEventChipTextColor = (): string => {
+    const alpha = !disabled ? "0.87" : "0.3"
+
+    return `rgba(255, 255, 255, ${alpha})`;
+  };
+
+  const getEventChipBackgroundColor = (): string => {
+    if (disabled) return "rgba(56, 56, 56, 0.3)";
+
+    switch (event.type) {
+      case "commute":
+        return "#347d3c";
+      case "drinking":
+        return "#bd7221";
+      case "energy":
+        return "#8121bd";
+      case "geek-seek":
+        return "#21adbd";
+      case "nuka":
+        return "#bdba21";
+      case "remote":
+        return "#bc3737";
+      case "walking":
+        return "#948917";
+      default:
+        const colorUndefinedEvent: never = event;
+        throw new Error(colorUndefinedEvent);
+    }
+  };
+
   return (
     <div
-      className={[
-        classes.eventChip,
-        classes[event.type],
-        disabled ? classes.disabled : undefined,
-      ].join(" ")}
+      className={classes.eventChip}
+      style={{ backgroundColor: getEventChipBackgroundColor(), color: getEventChipTextColor() }}
     >
       {event.name}
     </div>
