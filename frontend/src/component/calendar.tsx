@@ -137,7 +137,7 @@ const theme = {
     textAlign: "center",
     lineHeight: `${dayNameHeight}px`,
     fontWeight: 500,
-    backgroundColor: props.dark ? "rgb(56, 56, 56)" : "rgb(250, 250, 250)",
+    backgroundColor: props.dark ? "rgb(56, 56, 56)" : "#fff",
     userSelect: "none",
   }),
   blue: (props: StyleProps): JssStyle => ({
@@ -148,25 +148,26 @@ const theme = {
   }),
   day: (props: StyleProps): JssStyle => ({
     ...dayBaseStyle,
-    backgroundColor: props.dark ? "#333" : "#fff",
+    backgroundColor: props.dark ? "#333" : "#f5f5f5",
     "&:hover": {
-      backgroundColor: props.dark ? "#666" : "#ddd",
+      backgroundColor: props.dark ? "#666" : "#fff",
     },
   }),
   disabledDay: (props: StyleProps): JssStyle => ({
     ...dayBaseStyle,
-    color: props.dark ? "#ffffff4C" : "#21354788",
-    backgroundColor: props.dark ? "rgba(56, 56, 56, 0.87)" : "#ccc",
+    opacity: 0.6,
+    color: props.dark ? "#ccc" : "#333",
+    backgroundColor: props.dark ? "#333" : "#fff",
   }),
-  futureDay: style({
+  futureDay:  (props: StyleProps): JssStyle => ({
     ...dayBaseStyle,
-    opacity: 0.8,
+    color: props.dark ? "#666" : "#aaa",
   }),
   holiday: (props: StyleProps): JssStyle => ({
     ...dayBaseStyle,
-    backgroundColor: props.dark ? "#555" : "#eee",
+    backgroundColor: props.dark ? "#444" : "#eee",
     "&:hover": {
-      backgroundColor: props.dark ? "#666" : "#ddd",
+      backgroundColor: props.dark ? "#666" : "#fff",
     },
   }),
 };
