@@ -22,11 +22,17 @@ const DateText: React.FC<{ dateEvent: DateEvent; today: Date }> = ({
 }) => {
   const currentDateChipSize = 20;
   const getText = (dateEvent: DateEvent) => {
-    if (dateEvent.date?.getDate?.() == 1) {
+    if (dateEvent.date.getDate() == 1) {
+      if (dateEvent.date.getMonth() == 0) {
+        return `${dateEvent.date.getFullYear()}/${
+          dateEvent.date.getMonth() + 1
+        }/${dateEvent.date.getDate()}`;
+      }
+
       return `${dateEvent.date.getMonth() + 1}/${dateEvent.date.getDate()}`;
     }
 
-    return dateEvent.date?.getDate?.();
+    return dateEvent.date.getDate();
   };
 
   const isToday =
@@ -192,6 +198,8 @@ export const Calendar: FC<CalendarProps> = ({
   const { dark } = useDarkMode();
   const today = new Date();
   const classes = useStyles({ dark });
+  const monthBorderColor = dark ? "#fff" : "#333";
+  const monthBorderRate = 1.23;
 
   return (
     <>
@@ -219,6 +227,44 @@ export const Calendar: FC<CalendarProps> = ({
             key={index}
           >
             {dayOfWeek.name}
+            {new Array(4).fill(undefined).map((_, monthBorderIndex) => {
+              return (
+                <div
+                  key={monthBorderIndex}
+                  style={{
+                    position: "absolute",
+                    top:
+                      monthBorderIndex != 2
+                        ? -dateGapSize * ((monthBorderRate + 1) / 2)
+                        : `calc(100% - ${
+                            dateGapSize * ((monthBorderRate - 1) / 2)
+                          }px)`,
+                    left:
+                      monthBorderIndex != 3
+                        ? -dateGapSize * ((monthBorderRate + 1) / 2)
+                        : `calc(100% - ${
+                            dateGapSize * ((monthBorderRate - 1) / 2)
+                          }px)`,
+                    width:
+                      monthBorderIndex % 2 == 0
+                        ? dateWidth + dateGapSize * (monthBorderRate + 1)
+                        : dateGapSize * monthBorderRate,
+                    height:
+                      monthBorderIndex % 2 == 1
+                        ? dayNameHeight + dateGapSize * (monthBorderRate + 1)
+                        : dateGapSize * monthBorderRate,
+                    backgroundColor: monthBorderColor,
+                    visibility: ((): "collapse" | "hidden" | "visible" => {
+                      if (monthBorderIndex == 0) return "visible";
+                      if (monthBorderIndex == 1 && index == 0) return "visible";
+                      if (monthBorderIndex == 3 && index == 6) return "visible";
+
+                      return "hidden";
+                    })(),
+                  }}
+                />
+              );
+            })}
           </div>
         ))}
         <div
@@ -270,25 +316,16 @@ export const Calendar: FC<CalendarProps> = ({
                     day.date && day.date < new Date(currentMonth);
                   return (
                     <div
-                      className={[
-                        disabled
-                          ? classes.disabledDay
-                          : day.workingDay
-                          ? classes.day
-                          : classes.holiday,
-                        ...(new Date(day.date).setHours(0, 0, 0, 0) >
-                        new Date(today).setHours(0, 0, 0, 0)
-                          ? [classes.futureDay]
-                          : []),
-                      ].join(" ")}
                       style={{
+                        position: "absolute",
+                        width: `${dateWidth}px`,
+                        height: `${dateHeight}px`,
                         left: index * (dateWidth + dateGapSize) + dateGapSize,
                         top:
                           weekIndex * (dateHeight + dateGapSize) +
                           dayNameHeight +
                           dateGapSize * 2,
                       }}
-                      key={index}
                       onClick={
                         !disabled
                           ? (e) => {
@@ -298,37 +335,204 @@ export const Calendar: FC<CalendarProps> = ({
                             }
                           : undefined
                       }
+                      key={index}
                     >
-                      <DateText dateEvent={day} today={today} />
                       <div
-                        className={[classes.events, classes.topLeft].join(" ")}
+                        className={[
+                          disabled
+                            ? classes.disabledDay
+                            : day.workingDay
+                            ? classes.day
+                            : classes.holiday,
+                          ...(new Date(day.date).setHours(0, 0, 0, 0) >
+                          new Date(today).setHours(0, 0, 0, 0)
+                            ? [classes.futureDay]
+                            : []),
+                        ].join(" ")}
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                        }}
                       >
-                        {day.events
-                          .filter(
-                            (event) =>
-                              displayEventTags[event.type as string]?.enabled ??
-                              displayEventTags.other.enabled
-                          )
-                          .slice(0, 8)
-                          .map((event, index) => (
-                            <EventChip
-                              event={event}
-                              key={index}
-                              disabled={disabled}
-                            />
-                          ))}
+                        <DateText dateEvent={day} today={today} />
+                        <div
+                          className={[classes.events, classes.topLeft].join(
+                            " "
+                          )}
+                        >
+                          {day.events
+                            .filter(
+                              (event) =>
+                                displayEventTags[event.type as string]
+                                  ?.enabled ?? displayEventTags.other.enabled
+                            )
+                            .slice(0, 8)
+                            .map((event, index) => (
+                              <EventChip
+                                event={event}
+                                key={index}
+                                disabled={disabled}
+                              />
+                            ))}
+                        </div>
+                        {day.events.filter(
+                          (event) =>
+                            displayEventTags[event.type as string]?.enabled ??
+                            displayEventTags.other.enabled
+                        ).length > 8 && (
+                          <Badge
+                            badgeContent={day.events.length}
+                            color="primary"
+                            className={classes.topLeftBadge}
+                          />
+                        )}
                       </div>
-                      {day.events.filter(
-                        (event) =>
-                          displayEventTags[event.type as string]?.enabled ??
-                          displayEventTags.other.enabled
-                      ).length > 8 && (
-                        <Badge
-                          badgeContent={day.events.length}
-                          color="primary"
-                          className={classes.topLeftBadge}
-                        />
-                      )}
+                    </div>
+                  );
+                }),
+                <div
+                  key={7}
+                  style={{
+                    width: `${dateWidth}px`,
+                    height: `${dateHeight}px`,
+                    position: "absolute",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    top:
+                      weekIndex * (dateHeight + dateGapSize) +
+                      dayNameHeight +
+                      dateGapSize * 2,
+                    left: (dateWidth + dateGapSize) * 7 + dateGapSize,
+                    fontSize: "12px",
+                    textAlign: "center",
+                    lineHeight: `${dayNameHeight}px`,
+                    fontWeight: 500,
+                  }}
+                >
+                  {alcoholAmount !== undefined
+                    ? `${alcoholAmount} mg`
+                    : undefined}
+                </div>,
+              ];
+              return elements;
+            })}
+
+        {dateEvents &&
+          new Array(dateEvents.length / 7)
+            .fill(undefined)
+            .map((_undefined, weekIndex) => {
+              const weekEvents = dateEvents.slice(
+                weekIndex * 7,
+                (weekIndex + 1) * 7
+              );
+
+              const alcoholAmount =
+                weekEvents[0].date.getFullYear() >= 2023
+                  ? weekEvents.reduce(
+                      (sum, date) =>
+                        sum +
+                        date.events
+                          .map((event) =>
+                            event.type === "drinking" ? event.amounts ?? 0 : 0
+                          )
+                          .reduce((dateSum, val) => dateSum + val, 0),
+                      0
+                    )
+                  : undefined;
+
+              const elements = [
+                ...weekEvents.map((day, index) => {
+                  return (
+                    <div
+                      style={{
+                        position: "absolute",
+                        width: `${dateWidth}px`,
+                        height: `${dateHeight}px`,
+                        left: index * (dateWidth + dateGapSize) + dateGapSize,
+                        top:
+                          weekIndex * (dateHeight + dateGapSize) +
+                          dayNameHeight +
+                          dateGapSize * 2,
+                        pointerEvents: "none",
+                      }}
+                      key={index}
+                    >
+                      {new Array(4)
+                        .fill(undefined)
+                        .map((_, monthBorderIndex) => {
+                          return (
+                            <div
+                              key={monthBorderIndex}
+                              style={{
+                                position: "absolute",
+                                top:
+                                  monthBorderIndex != 2
+                                    ? -dateGapSize * ((monthBorderRate + 1) / 2)
+                                    : `calc(100% - ${
+                                        dateGapSize *
+                                        ((monthBorderRate - 1) / 2)
+                                      }px)`,
+                                left:
+                                  monthBorderIndex != 3
+                                    ? -dateGapSize * ((monthBorderRate + 1) / 2)
+                                    : `calc(100% - ${
+                                        dateGapSize *
+                                        ((monthBorderRate - 1) / 2)
+                                      }px)`,
+                                width:
+                                  monthBorderIndex % 2 == 0
+                                    ? dateWidth +
+                                      dateGapSize * (monthBorderRate + 1)
+                                    : dateGapSize * monthBorderRate,
+                                height:
+                                  monthBorderIndex % 2 == 1
+                                    ? dateHeight +
+                                      dateGapSize * (monthBorderRate + 1)
+                                    : dateGapSize * monthBorderRate,
+                                backgroundColor: monthBorderColor,
+                                visibility: (():
+                                  | "collapse"
+                                  | "hidden"
+                                  | "visible" => {
+                                  // if (monthBorderIndex == 0 && weekIndex == 0) return "visible"
+                                  if (monthBorderIndex == 1 && index == 0)
+                                    return "visible";
+                                  if (
+                                    monthBorderIndex == 2 &&
+                                    weekIndex == dateEvents.length / 7 - 1
+                                  )
+                                    return "visible";
+                                  if (monthBorderIndex == 3 && index == 6)
+                                    return "visible";
+
+                                  if (monthBorderIndex == 1) {
+                                    const nextDay = new Date(day.date);
+                                    nextDay.setDate(nextDay.getDate() - 1);
+
+                                    if (
+                                      nextDay.getMonth() != day.date.getMonth()
+                                    )
+                                      return "visible";
+                                  }
+                                  if (monthBorderIndex == 0) {
+                                    const nextDay = new Date(day.date);
+                                    nextDay.setDate(nextDay.getDate() - 7);
+
+                                    if (
+                                      nextDay.getMonth() != day.date.getMonth()
+                                    )
+                                      return "visible";
+                                  }
+
+                                  return "hidden";
+                                })(),
+                              }}
+                            />
+                          );
+                        })}
                     </div>
                   );
                 }),
