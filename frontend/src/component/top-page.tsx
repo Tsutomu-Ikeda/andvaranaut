@@ -90,30 +90,32 @@ export const TopPage: FC = () => {
     walkCounts,
   }: CommuteStats = useMemo<CommuteStats | undefined>(() => {
     if (!transitInformation) return { costs: {}, counts: {}, walkCounts: {} };
-    const data = dateEvents?.filter((dateEvent) => dateEvent.date <= today).reduce<CommuteStats>(
-      (prev, current) => {
-        const commuteEvent: CommuteEvent | undefined = current.events.find(
-          (event) => event.type == "commute"
-        ) as any;
-        const walkEventCount: number = current.events.filter(
-          (event) => event.type == "walking"
-        ).length;
-        if (!commuteEvent) return prev;
-        if (!current.date) return prev;
-        const key = current.date.toISOString().slice(0, 7);
+    const data = dateEvents
+      ?.filter((dateEvent) => dateEvent.date <= today)
+      .reduce<CommuteStats>(
+        (prev, current) => {
+          const commuteEvent: CommuteEvent | undefined = current.events.find(
+            (event) => event.type == "commute"
+          ) as any;
+          const walkEventCount: number = current.events.filter(
+            (event) => event.type == "walking"
+          ).length;
+          if (!commuteEvent) return prev;
+          if (!current.date) return prev;
+          const key = current.date.toISOString().slice(0, 7);
 
-        prev.counts[key] = (prev.counts[key] ?? 0) + 1;
-        prev.walkCounts[key] = (prev.walkCounts[key] ?? 0) + walkEventCount;
+          prev.counts[key] = (prev.counts[key] ?? 0) + 1;
+          prev.walkCounts[key] = (prev.walkCounts[key] ?? 0) + walkEventCount;
 
-        prev.costs[key] =
-          (prev.costs[key] ?? 0) +
-          (commuteEvent.fare ??
-            transitInformation.unitPrice * (2 - walkEventCount));
+          prev.costs[key] =
+            (prev.costs[key] ?? 0) +
+            (commuteEvent.fare ??
+              transitInformation.unitPrice * (2 - walkEventCount));
 
-        return prev;
-      },
-      { costs: {}, counts: {}, walkCounts: {} }
-    );
+          return prev;
+        },
+        { costs: {}, counts: {}, walkCounts: {} }
+      );
     return data;
   }, [dateEvents, transitInformation]) ?? {
     costs: {},
