@@ -11,6 +11,7 @@ import {
 import { useStableStateExtra } from "react-stable-state";
 import * as env from "../env";
 import { PendingBadge } from "./pending-badge";
+import { useDisplaySize } from "../hooks/use-display-size";
 
 type CommuteStats = {
   costs: { [key: string]: number };
@@ -63,6 +64,7 @@ export const TopPage: FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [transitInformation, setTransitInformation] =
     useState<TransitInformation>();
+  const { displaySize } = useDisplaySize();
 
   useEffect(() => {
     (async () => {
@@ -177,7 +179,13 @@ export const TopPage: FC = () => {
   return (
     <div className="App" id="App">
       <Typography variant="h1">Andvaranaut</Typography>
-      <div className="meta">
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          margin: displaySize === "pc" ? "5px 25px" : "5px 0px",
+        }}
+      >
         最終更新日時:{" "}
         {transitInformation && transitInformation.lastModified.toLocaleString()}
       </div>
@@ -185,12 +193,18 @@ export const TopPage: FC = () => {
         style={{
           display: "flex",
           justifyContent: "flex-end",
-          marginBottom: "5px",
+          margin: displaySize === "pc" ? "5px 25px" : "5px 0px",
         }}
       >
         <PendingBadge synced={!isEditing && !isSaving} />
       </div>
-      <div className="meta">
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          margin: displaySize === "pc" ? "5px 25px" : "5px 0px",
+        }}
+      >
         <a href="http://localhost:3333/daily-report-editor/">日報入力</a>
       </div>
       {dateEvents && (

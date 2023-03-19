@@ -1,8 +1,8 @@
 #root {
-  max-width: 1280px;
-  min-width: 640px;
+  max-width: 868px;
+  width: 100%;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 20px;
   text-align: center;
 }
 

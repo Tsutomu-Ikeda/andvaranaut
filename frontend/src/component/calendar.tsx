@@ -8,6 +8,7 @@ import { daysOfWeeks } from "../lib/calendar";
 import { DateEditor } from "./date-editor";
 import { Badge, Checkbox, FormControlLabel } from "@mui/material/";
 import { JssStyle } from "jss";
+import { useDisplaySize } from "../hooks/use-display-size";
 
 const style: (s: JssStyle) => JssStyle = (s) => s;
 
@@ -16,28 +17,33 @@ const dateWidth = 102,
   dateGapSize = 1,
   dayNameHeight = 30;
 
-const DateText: React.FC<{ dateEvent: DateEvent; today: Date }> = ({
-  dateEvent,
-  today,
-}) => {
+const DateText: React.FC<{
+  dateEvent: DateEvent;
+  isFirstItem?: boolean;
+  showDayName?: boolean;
+  isToday?: boolean;
+}> = ({ dateEvent, isFirstItem, showDayName, isToday }) => {
   const currentDateChipSize = 20;
+
   const getText = (dateEvent: DateEvent) => {
-    if (dateEvent.date.getDate() == 1) {
-      if (dateEvent.date.getMonth() == 0) {
+    const dayName = showDayName
+      ? ` (${daysOfWeeks[(dateEvent.date.getDay() + 6) % 7].name})`
+      : "";
+
+    if (dateEvent.date.getDate() == 1 || isFirstItem) {
+      if (dateEvent.date.getMonth() == 0 && dateEvent.date.getDate() == 1) {
         return `${dateEvent.date.getFullYear()}/${
           dateEvent.date.getMonth() + 1
-        }/${dateEvent.date.getDate()}`;
+        }/${dateEvent.date.getDate()}${dayName}`;
       }
 
-      return `${dateEvent.date.getMonth() + 1}/${dateEvent.date.getDate()}`;
+      return `${
+        dateEvent.date.getMonth() + 1
+      }/${dateEvent.date.getDate()}${dayName}`;
     }
 
-    return dateEvent.date.getDate();
+    return `${dateEvent.date.getDate()}${dayName}`;
   };
-
-  const isToday =
-    new Date(dateEvent.date).setHours(0, 0, 0, 0) ==
-    new Date(today).setHours(0, 0, 0, 0);
 
   return (
     <div
@@ -68,7 +74,10 @@ const DateText: React.FC<{ dateEvent: DateEvent; today: Date }> = ({
   );
 };
 
-const modalContentStyle: (props: StyleProps) => CSSProperties = ({ dark }) => ({
+const modalContentStyle: (props: StyleProps) => CSSProperties = ({
+  dark,
+  displaySize,
+}) => ({
   backgroundColor: dark ? "#242424" : "#fff",
   width: "80vw",
   maxWidth: "840px",
@@ -94,6 +103,7 @@ const dayBaseStyle: JssStyle = {
 
 type StyleProps = {
   dark?: boolean;
+  displaySize?: "pc" | "sp";
 };
 
 const theme = {
@@ -126,7 +136,7 @@ const theme = {
   }),
   modalInnerContainer: style({
     width: "100%",
-    padding: "20px",
+    padding: "5px",
   }),
   dayName: (props: StyleProps): JssStyle => ({
     position: "absolute",
@@ -149,9 +159,12 @@ const theme = {
   day: (props: StyleProps): JssStyle => ({
     ...dayBaseStyle,
     backgroundColor: props.dark ? "#333" : "#f5f5f5",
-    "&:hover": {
-      backgroundColor: props.dark ? "#666" : "#fff",
-    },
+    "&:hover":
+      props.displaySize == "pc"
+        ? {
+            backgroundColor: props.dark ? "#666" : "#fff",
+          }
+        : {},
   }),
   disabledDay: (props: StyleProps): JssStyle => ({
     ...dayBaseStyle,
@@ -159,17 +172,33 @@ const theme = {
     color: props.dark ? "#ccc" : "#333",
     backgroundColor: props.dark ? "#333" : "#fff",
   }),
-  futureDay:  (props: StyleProps): JssStyle => ({
+  futureDay: (props: StyleProps): JssStyle => ({
     ...dayBaseStyle,
-    color: props.dark ? "#666" : "#aaa",
+    color: props.dark ? "#aaa" : "#aaa",
   }),
   holiday: (props: StyleProps): JssStyle => ({
     ...dayBaseStyle,
     backgroundColor: props.dark ? "#444" : "#eee",
-    "&:hover": {
-      backgroundColor: props.dark ? "#666" : "#fff",
-    },
+    "&:hover":
+      props.displaySize == "pc"
+        ? {
+            backgroundColor: props.dark ? "#666" : "#fff",
+          }
+        : {},
   }),
+  spDay: (props: StyleProps): JssStyle => ({
+    flex: "1",
+    flexGrow: "1",
+    "&:hover":
+      props.displaySize == "pc"
+        ? {
+            backgroundColor: props.dark ? "#666" : "#fff",
+          }
+        : {},
+  }),
+  formContent: {
+    padding: "0px 20px",
+  },
 };
 
 type StyleKeys = keyof typeof theme;
@@ -197,10 +226,170 @@ export const Calendar: FC<CalendarProps> = ({
     other: { enabled: true, label: "その他" },
   });
   const { dark } = useDarkMode();
+  const { displaySize } = useDisplaySize();
   const today = new Date();
-  const classes = useStyles({ dark });
+  const classes = useStyles({ dark, displaySize });
   const monthBorderColor = dark ? "#fff" : "#333";
   const monthBorderRate = 1.23;
+  const [start, setStart] = useState(
+    (new Date(today).setHours(0, 0, 0, 0) -
+      new Date(dateEvents[0].date).setHours(0, 0, 0, 0)) /
+      (1000 * 60 * 60 * 24)
+  );
+
+  if (displaySize == "sp")
+    return (
+      <>
+        <div
+          style={{
+            display: "flex",
+            width: "100%",
+            justifyContent: "space-between",
+            margin: "20px 0px",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#333",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "5px 10px",
+              borderRadius: "5px",
+              color: start - 7 < 0 ? "#666" : "#ccc",
+            }}
+            onClick={() =>
+              setStart((current) => {
+                if (current - 7 < 0) return current;
+                else return current - 7;
+              })
+            }
+          >
+            &lt; 前の週へ
+          </div>
+          <div
+            style={{
+              backgroundColor: "#333",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "5px 10px",
+              borderRadius: "5px",
+              color: start + 13 >= dateEvents.length ? "#666" : "#ccc",
+            }}
+            onClick={() =>
+              setStart((current) => {
+                if (current + 13 >= dateEvents.length) return current;
+                else return current + 7;
+              })
+            }
+          >
+            次の週へ &gt;
+          </div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            width: "100%",
+            height: (dateHeight * 1.5 + 10) * 7 - 10,
+            flexDirection: "column",
+            gap: "20px",
+            justifyContent: "center",
+          }}
+        >
+          {dateEvents &&
+            dateEvents.slice(start, start + 7).map((day, index) => {
+              const disabled = day.date && day.date < new Date(currentMonth);
+              return (
+                <div
+                  className={classes.spDay}
+                  onClick={
+                    !disabled
+                      ? (e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setCurrentDateEventIndex(start + index);
+                        }
+                      : undefined
+                  }
+                  key={index}
+                >
+                  <div
+                    style={{
+                      position: "relative",
+                      backgroundColor: dark ? "#333" : "#fff",
+                      color: dark ? "#ccc" : "#333",
+                      opacity: disabled ? 0.6 : 1,
+                      height: "100%",
+                      padding: "10px",
+                    }}
+                  >
+                    <DateText
+                      dateEvent={day}
+                      isFirstItem={index === 0}
+                      showDayName
+                    />
+                    <div
+                      className={[classes.events, classes.topLeft].join(" ")}
+                    >
+                      {day.events
+                        .filter(
+                          (event) =>
+                            displayEventTags[event.type as string]?.enabled ??
+                            displayEventTags.other.enabled
+                        )
+                        .slice(0, 8)
+                        .map((event, index) => (
+                          <EventChip
+                            event={event}
+                            key={index}
+                            disabled={disabled}
+                          />
+                        ))}
+                    </div>
+                    {day.events.filter(
+                      (event) =>
+                        displayEventTags[event.type as string]?.enabled ??
+                        displayEventTags.other.enabled
+                    ).length > 8 && (
+                      <Badge
+                        badgeContent={day.events.length}
+                        color="primary"
+                        className={classes.topLeftBadge}
+                      />
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+        <Modal
+          isOpen={currentDateEventIndex !== undefined}
+          style={{
+            content: modalContentStyle({ dark }),
+            overlay: {
+              backgroundColor: "rgba(56, 56, 56, 0.7)",
+            },
+          }}
+          shouldCloseOnOverlayClick={true}
+          shouldCloseOnEsc={true}
+          onRequestClose={() => {
+            setCurrentDateEventIndex(undefined);
+          }}
+        >
+          {currentDateEventIndex !== undefined && (
+            <div className={classes.modalInnerContainer}>
+              <DateEditor
+                classes={classes}
+                dateEvents={dateEvents}
+                currentDateEventIndex={currentDateEventIndex}
+                setDateEvents={setDateEvents}
+              />
+            </div>
+          )}
+        </Modal>
+      </>
+    );
 
   return (
     <>
@@ -356,7 +545,13 @@ export const Calendar: FC<CalendarProps> = ({
                           left: 0,
                         }}
                       >
-                        <DateText dateEvent={day} today={today} />
+                        <DateText
+                          dateEvent={day}
+                          isToday={
+                            new Date(day.date).setHours(0, 0, 0, 0) ==
+                            new Date(today).setHours(0, 0, 0, 0)
+                          }
+                        />
                         <div
                           className={[classes.events, classes.topLeft].join(
                             " "
