@@ -230,7 +230,7 @@ export const Calendar: FC<CalendarProps> = ({
   const today = new Date();
   const classes = useStyles({ dark, displaySize });
   const monthBorderColor = dark ? "#fff" : "#333";
-  const monthBorderRate = 1.23;
+  const monthBorderRate = 2;
   const [start, setStart] = useState(
     (new Date(today).setHours(0, 0, 0, 0) -
       new Date(dateEvents[0].date).setHours(0, 0, 0, 0)) /
