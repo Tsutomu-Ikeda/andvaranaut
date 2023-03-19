@@ -223,6 +223,7 @@ export const Calendar: FC<CalendarProps> = ({
     commute: { enabled: true, label: "出社" },
     remote: { enabled: true, label: "在宅" },
     drinking: { enabled: true, label: "飲酒量" },
+    nuka: { enabled: true, label: "ぬか漬け" },
     other: { enabled: true, label: "その他" },
   });
   const { dark } = useDarkMode();
