@@ -137,8 +137,8 @@ func transitInformationHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/api/date_events", dateEventsHandler)
 	http.HandleFunc("/api/transit_information", transitInformationHandler)
-	fmt.Println("listening: http://localhost:8000")
-	err := http.ListenAndServe("127.0.0.1:8000", nil)
+	fmt.Println("listening: http://localhost:8080")
+	err := http.ListenAndServe("127.0.0.1:8080", nil)
 
 	if err != nil {
 		panic(err)
