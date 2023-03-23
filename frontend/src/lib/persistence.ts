@@ -10,15 +10,21 @@ export type CommuteEvent = {
   fare?: number;
 }
 
+export type WalkEvent = {
+  name: "徒歩";
+  type: "walking";
+  fare?: number;
+}
+
 export type DrinkEvent = {
   name: string;
   type: "drinking";
   amounts: number;
 }
 
-export type Event = GeekSeekEvent | CommuteEvent | DrinkEvent|  {
+export type Event = GeekSeekEvent | CommuteEvent | DrinkEvent | WalkEvent |  {
   name: string;
-  type: "remote" | "walking" | "energy" | "nuka";
+  type: "remote" | "energy" | "nuka";
   amounts?: undefined;
 };
 

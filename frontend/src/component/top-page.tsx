@@ -7,6 +7,7 @@ import {
   CommuteEvent,
   DateEvent,
   TransitInformation,
+  WalkEvent,
 } from "../lib/persistence";
 import { useStableStateExtra } from "react-stable-state";
 import * as env from "../env";
@@ -96,23 +97,30 @@ export const TopPage: FC = () => {
       ?.filter((dateEvent) => dateEvent.date <= today)
       .reduce<CommuteStats>(
         (prev, current) => {
-          const commuteEvent: CommuteEvent | undefined = current.events.find(
-            (event) => event.type == "commute"
-          ) as any;
-          const walkEventCount: number = current.events.filter(
-            (event) => event.type == "walking"
-          ).length;
+          const commuteEvent = current.events.find(
+            (event): event is CommuteEvent => event.type == "commute"
+          );
+          const walkEvents = current.events.filter(
+            (event): event is WalkEvent => event.type == "walking"
+          );
+          const walkTotalFare: number = walkEvents.reduce(
+            (total, event) =>
+              total + (event.fare ?? -transitInformation.unitPrice),
+            0
+          );
           if (!commuteEvent) return prev;
           if (!current.date) return prev;
           const key = current.date.toISOString().slice(0, 7);
 
           prev.counts[key] = (prev.counts[key] ?? 0) + 1;
-          prev.walkCounts[key] = (prev.walkCounts[key] ?? 0) + walkEventCount;
+          prev.walkCounts[key] =
+            (prev.walkCounts[key] ?? 0) + walkEvents.length;
 
           prev.costs[key] =
             (prev.costs[key] ?? 0) +
-            (commuteEvent.fare ??
-              transitInformation.unitPrice * (2 - walkEventCount));
+            (commuteEvent.fare !== undefined
+              ? commuteEvent.fare + walkTotalFare
+              : transitInformation.unitPrice * (2 - walkEvents.length));
 
           return prev;
         },
