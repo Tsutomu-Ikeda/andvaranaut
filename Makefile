@@ -10,6 +10,7 @@ build_backend:
 	cd backend/get_date_events && GOOS=linux GOARCH=amd64 go build -o bin/
 	cd backend/post_date_events && GOOS=linux GOARCH=amd64 go build -o bin/
 	cd backend/get_transit_information && GOOS=linux GOARCH=amd64 go build -o bin/
+	cd backend/post_authenticate && GOOS=linux GOARCH=amd64 go build -o bin/
 	git stash pop || :
 
 build:

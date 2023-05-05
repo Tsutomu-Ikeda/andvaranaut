@@ -71,6 +71,14 @@ resource "aws_apigatewayv2_integration" "get_transit_information" {
   integration_method = "POST"
 }
 
+resource "aws_apigatewayv2_integration" "post_authenticate" {
+  api_id = aws_apigatewayv2_api.andvaranaut.id
+
+  integration_uri    = aws_lambda_function.post_authenticate.invoke_arn
+  integration_type   = "AWS_PROXY"
+  integration_method = "POST"
+}
+
 resource "aws_apigatewayv2_route" "get_date_events" {
   api_id = aws_apigatewayv2_api.andvaranaut.id
 
@@ -96,4 +104,11 @@ resource "aws_apigatewayv2_route" "get_transit_information" {
   target             = "integrations/${aws_apigatewayv2_integration.get_transit_information.id}"
   authorization_type = "JWT"
   authorizer_id      = aws_apigatewayv2_authorizer.andvaranaut_auth.id
+}
+
+resource "aws_apigatewayv2_route" "post_authenticate" {
+  api_id = aws_apigatewayv2_api.andvaranaut.id
+
+  route_key          = "POST /api/authenticate"
+  target             = "integrations/${aws_apigatewayv2_integration.post_authenticate.id}"
 }

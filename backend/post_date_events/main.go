@@ -58,7 +58,7 @@ func toDateEventsObj(buf *bytes.Buffer) []DateEvent {
 }
 
 func handle(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	username := request.RequestContext.Authorizer["claims"].(map[string]interface{})["cognito:username"].(string)
+	username := request.RequestContext.Authorizer["claims"].(map[string]interface{})["username"].(string)
 	currentMonth := request.QueryStringParameters["currentMonth"]
 
 	awsSession := session.Must(session.NewSession())

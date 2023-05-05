@@ -51,7 +51,7 @@ const parseWithDate = (str: string) => {
 };
 
 export class PersistenceClient {
-  async calendarEvents(token: string, currentMonth: string): Promise<DateEvent[]> {
+  async calendarEvents(token: string | null, currentMonth: string): Promise<DateEvent[]> {
     if (!token) return []
 
     const days: DateEvent[] = parseWithDate(await fetch(`/api/date_events?${new URLSearchParams({ currentMonth })}`, { headers: { Authorization: `Bearer ${token}` } }).then((resp) => {
@@ -71,7 +71,7 @@ export class PersistenceClient {
     return [...days]
   }
 
-  async saveCalendarEvents(token: string, data: DateEvent[] | undefined, currentMonth: string): Promise<void> {
+  async saveCalendarEvents(token: string | null, data: DateEvent[] | undefined, currentMonth: string): Promise<void> {
     if (!token || !data) return
 
     await fetch(`/api/date_events?${new URLSearchParams({ currentMonth })}`, { method: 'post', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(data) }).then((resp) => {
@@ -79,7 +79,7 @@ export class PersistenceClient {
     })
   }
 
-  async transitInformation(token: string): Promise<TransitInformation> {
+  async transitInformation(token: string | null): Promise<TransitInformation> {
     if (!token) return { unitPrice: 1, lastModified: new Date() }
 
     const data: TransitInformation = parseWithDate(await fetch("/api/transit_information", { headers: { Authorization: `Bearer ${token}` } }).then((resp) => {

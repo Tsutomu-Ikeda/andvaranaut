@@ -36,7 +36,7 @@ type ResponseBody struct {
 }
 
 func handle(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	username := request.RequestContext.Authorizer["claims"].(map[string]interface{})["cognito:username"].(string)
+	username := request.RequestContext.Authorizer["claims"].(map[string]interface{})["username"].(string)
 
 	currentMonth := request.QueryStringParameters["currentMonth"]
 

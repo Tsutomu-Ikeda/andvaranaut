@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { Calendar } from "./calendar";
 import { useLogin } from "../hooks/use-login";
 import { Typography } from "@mui/material";
@@ -9,7 +9,6 @@ import {
   TransitInformation,
   WalkEvent,
 } from "../lib/persistence";
-import { useStableStateExtra } from "react-stable-state";
 import * as env from "../env";
 import { PendingBadge } from "./pending-badge";
 import { useDisplaySize } from "../hooks/use-display-size";
@@ -23,31 +22,41 @@ type CommuteStats = {
 export const TopPage: FC = () => {
   const currentMonth = "2023-03";
   const redirectWaitSeconds = 1;
-  const { token } = useLogin();
-  const {
-    state: dateEvents,
-    stableState: stableDateEvents,
-    setState: setDateEvents,
-    isEditing,
-  } = useStableStateExtra<DateEvent[] | undefined>({
-    initialState: undefined,
-    delay: 3000,
-    load: async () => {
+  const { isAuthLoading, isAuthenticated, token, state } = useLogin();
+  const [dateEvents, setDateEvents] = useState<DateEvent[]>();
+
+  const [isEditing, setIsEditing] = useState(false);
+  const isEditingRef = useRef(false);
+
+  useEffect(() => {
+    (async () => {
       try {
-        return await new PersistenceClient().calendarEvents(
-          token,
-          currentMonth
+        setDateEvents(
+          await new PersistenceClient().calendarEvents(token, currentMonth)
         );
+
+        setTimeout(() => {
+          setIsEditing(false);
+          isEditingRef.current = false;
+        }, 10);
       } catch (e) {
         setAuthError("認証に失敗しました");
       }
-    },
-    onStableStateChanged: async () => {
+    })();
+  }, [token]);
+
+  useEffect(() => {
+    setIsEditing(true);
+    isEditingRef.current = true;
+
+    const timeout = setTimeout(async () => {
+      if (!isEditingRef.current) return;
+
       setIsSaving(true);
       try {
         await new PersistenceClient().saveCalendarEvents(
           token,
-          stableDateEvents,
+          dateEvents,
           currentMonth
         );
         setTransitInformation((current) => {
@@ -56,9 +65,16 @@ export const TopPage: FC = () => {
         });
       } finally {
         setIsSaving(false);
+        setIsEditing(false);
+        isEditingRef.current = false;
       }
-    },
-  });
+    }, 3000);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [dateEvents]);
+
   const today = new Date();
   const [authError, setAuthError] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
@@ -69,7 +85,9 @@ export const TopPage: FC = () => {
 
   useEffect(() => {
     (async () => {
-      if (!token) {
+      if (isAuthLoading) return;
+
+      if (!isAuthenticated) {
         setAuthError("ログインしていません");
         setIsLoading(false);
         return;
@@ -85,7 +103,7 @@ export const TopPage: FC = () => {
         setIsLoading(false);
       }
     })();
-  }, [token]);
+  }, [token, isAuthenticated, isAuthLoading]);
 
   const {
     costs: totalCommuteCosts,
@@ -164,7 +182,7 @@ export const TopPage: FC = () => {
   useEffect(() => {
     if (authError) {
       setTimeout(() => {
-        window.location.href = env.loginPageUrl;
+        window.location.href = env.loginPageUrl(state);
       }, redirectWaitSeconds * 1000);
     }
   }, [authError]);
@@ -176,7 +194,7 @@ export const TopPage: FC = () => {
       <>
         {authError}
         <br />
-        再度 <a href={env.loginPageUrl}>ログインページ</a>{" "}
+        再度 <a href={env.loginPageUrl(state)}>ログインページ</a>{" "}
         からログインしてください。
         <br />
         自動的にリダイレクトします。
